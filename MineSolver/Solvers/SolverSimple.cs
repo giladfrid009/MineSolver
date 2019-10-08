@@ -23,9 +23,9 @@ namespace MineSolver.Solvers
                     {
                         HashSet<(int, int)> pendingSolveNew = new HashSet<(int, int)>();
 
-                        foreach (var coord in pendingSolve)
+                        foreach ((int x2, int y2) in pendingSolve)
                         {
-                            pendingSolveNew.UnionWith(SolveLogic(coord.X, coord.Y, log));
+                            pendingSolveNew.UnionWith(SolveLogic(x2, y2, log));
                         }
 
                         pendingSolve = pendingSolveNew;

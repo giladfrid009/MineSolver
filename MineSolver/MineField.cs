@@ -8,7 +8,7 @@ namespace MineSolver
         private static readonly Random rnd = new Random();
 
         public char BombChar { get; set; } = '@';
-        public char HiddenChar { get; set; } = '#';
+        private char HiddenChar { get; set; } = ' ';
 
         private bool printOnline;
         private readonly int[,] fieldSolved;
@@ -237,7 +237,9 @@ namespace MineSolver
             }
             else if (coordVal == BombVal)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.Write(BombChar);
+                Console.ForegroundColor = ConsoleColor.Gray;
             }
             else if (coordVal >= 0)
             {

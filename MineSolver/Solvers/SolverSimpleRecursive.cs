@@ -24,6 +24,11 @@
 
         private void SolveLogic(int x, int y, SolveLog log)
         {
+            if (solveStatus[x, y] || field[x, y] < 0)
+            {
+                return;
+            }
+
             (int nHidden, int nFlags) = GetCoordInfo(x, y);
 
             if (field[x, y] == nFlags)

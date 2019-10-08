@@ -7,15 +7,17 @@ namespace MineSolver
     {
         static void Main()
         {
-            MineField field = new MineField(350, 90);
+            MineField field = new MineField(360, 90);
 
-            field.Generate(0.2, 3, 3);
-            field.Reveal(3, 3);
+            field.Generate(0.2, field.Width / 2, field.Height / 2);
+            field.Reveal(field.Width / 2, field.Height / 2);
 
             field.PrintOnlineEnable();
 
             SolverComplex solverComplex = new SolverComplex(field);
             solverComplex.Solve();
+
+            //field.Print();
 
             Console.ReadKey();
         }
