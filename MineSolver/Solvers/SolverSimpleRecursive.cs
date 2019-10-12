@@ -1,8 +1,8 @@
 ﻿namespace MineSolver.Solvers
 {
-    public class SolverSimpleRecursive : SolverBase
+    public class SolverSimpleRecursive : SolverBase<CoordInfo>
     {
-        public SolverSimpleRecursive(MineFieldBase field) : base(field)
+        public SolverSimpleRecursive(IMIneField field) : base(field)
         {
 
         }
@@ -24,28 +24,27 @@
 
         private void SolveLogic(int x, int y, SolveLog log)
         {
-            if (solveStatus[x, y] || field[x, y] < 0)
+            if (fieldInfo[x, y].IsSolved || fieldInfo[x, y].IsValue == false)
             {
                 return;
             }
 
-            (int nHidden, int nFlags) = GetCoordInfo(x, y);
+            int nHidden = fieldInfo[x, y].NumHidden;
+            int nFlags = fieldInfo[x, y].NumMines;
 
             if (field[x, y] == nFlags)
             {
-                solveStatus[x, y] = true;
-
-                foreach ((int x2, int y2) in field.GetHidden(x, y))
+                foreach (var (x2, y2) in fieldInfo[x, y].HiddenCoords)
                 {
                     field.Reveal(x2, y2);
                     log.AddMove(x2, y2, Move.Reveal);
                 }
 
-                foreach ((int x2, int y2) in GetUnsolved(x, y))
+                foreach (var (x2, y2) in GetUnsolved(x, y))
                 {
                     SolveLogic(x2, y2, log);
 
-                    foreach ((int x3, int y3) in GetUnsolved(x2, y2))
+                    foreach (var (x3, y3) in GetUnsolved(x2, y2))
                     {
                         SolveLogic(x3, y3, log);
                     }
@@ -53,17 +52,15 @@
             }
             else if (nHidden == field[x, y] - nFlags)
             {
-                solveStatus[x, y] = true;
+                var hidden = fieldInfo[x, y].HiddenCoords;
 
-                var hidden = field.GetHidden(x, y);
-
-                foreach ((int x2, int y2) in hidden)
+                foreach (var (x2, y2) in hidden)
                 {
                     field.Flag(x2, y2);
                     log.AddMove(x2, y2, Move.Flag);
                 }
 
-                foreach ((int x2, int y2) in hidden)
+                foreach (var (x2, y2) in hidden)
                 {
                     foreach ((int x3, int y3) in GetUnsolved(x2, y2))
                     {

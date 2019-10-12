@@ -1,18 +1,20 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using MineSolver.Solvers.Complex;
 
 namespace MineSolver.Solvers
 {
-    public class SolverComplex : SolverSimple
-    {
-        private readonly ComboLibrary comboLibrary;
-        private readonly bool[,] tryLogic;
 
-        public SolverComplex(MineFieldBase field) : base(field)
+    public class SolverComplex : SolverBase<CoordInfoComplex>
+    {
+        private readonly SolverSimple solverSimple;
+        private readonly ComboLibrary comboLibrary;
+
+        public SolverComplex(IMIneField field) : base(field)
         {
+            solverSimple = new SolverSimple(field);
             comboLibrary = new ComboLibrary();
-            tryLogic = new bool[width, height];
         }
 
         private void Reset()
@@ -21,7 +23,7 @@ namespace MineSolver.Solvers
             {
                 for (int y = 0; y < height; y++)
                 {
-                    tryLogic[x, y] = true;
+                    fieldInfo[x, y].TryComplex = true;
                 }
             }
         }
@@ -36,15 +38,17 @@ namespace MineSolver.Solvers
 
             do
             {
+                var oldField = field.Copy();
+
                 progress = false;
 
-                log.Combine(base.Solve());
+                log.Combine(solverSimple.Solve());
 
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (tryLogic[x, y] && SolveLogic(x, y, log))
+                        if (SolveLogic(x, y, log))
                         {
                             progress = true;
                             x = width;
@@ -52,71 +56,104 @@ namespace MineSolver.Solvers
                         }
                     }
                 }
+
+                if (progress == false)
+                    break;
+
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        if (oldField[x, y] != field[x, y])
+                        {
+                            if (fieldInfo[x, y].IsValue)                                
+                            {
+                                UpdateAffected(x, y);
+                            }
+                            else
+                            {
+                                foreach (var (x2, y2) in fieldInfo[x, y].ValueCoords)
+                                {
+                                    UpdateAffected(x2, y2);
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            while (progress);
+            while (true);
 
             return log;
         }
 
         private bool SolveLogic(int x, int y, SolveLog log)
         {
-            if (solveStatus[x, y] || field[x, y] < 0)
-            {
-                return false;
-            }
-         
-            var combos = GetValidCombos(x, y);
-
-            if (combos.Count == 0)
+            if (fieldInfo[x, y].TryComplex == false)
             {
                 return false;
             }
 
-            var hidden = field.GetHidden(x, y);
-            var common = Combo.FindCommon(combos);
+            fieldInfo[x, y].TryComplex = false;
 
-            tryLogic[x, y] = false;
+            var combos = GetValidCombos(x, y);            
+            var common = GetCommonCombo(combos);
+            var hidden = fieldInfo[x, y].HiddenCoords;
 
-            return ApplyCommon(hidden, common, log);
+            return ApplyCommonCombo(hidden, common, log);
         }
 
-        protected List<Combo> GetValidCombos(int x, int y)
+        // todo: doesn't cover all cases somewhy. why?!
+        private List<Combo> GetValidCombos(int x, int y)
         {
-            List<Combo> validCombos = new List<Combo>();
+            List<Combo> valid = new List<Combo>();
 
-            (int nHidden, int nFlags) = GetCoordInfo(x, y);
+            int nFlagsToComplete = field[x, y] - fieldInfo[x, y].NumMines;
 
-            var allCombos = comboLibrary[nHidden, field[x, y] - nFlags];
-            var unsolved = GetUnsolved(x, y);
-            var hidden = field.GetHidden(x, y);
+            var hidden = GetHiddenUnused(x, y);
 
-            foreach(var combo in allCombos)
+            if (hidden.Count < nFlagsToComplete)
             {
-                bool isValid = true;
+                return valid;
+            }
 
-                combo.Apply(field, hidden);             
+            var combos = comboLibrary[hidden.Count, nFlagsToComplete];
 
-                foreach(var (xUnsolved, yUnsolved) in unsolved)
+            var unsolved = GetUnsolved(x, y);
+
+            foreach(var combo in combos)
+            {
+                var effected = new HashSet<(int, int)>(unsolved);
+
+                var bombs = ApplyCombo(combo, hidden);
+
+                foreach (var bomb in bombs)
                 {
-                    if (IsCoordValid(xUnsolved, yUnsolved) == false)
+                    effected.UnionWith(fieldInfo[bomb].ValueCoords);
+                }
+
+                bool currentValid = true;
+
+                foreach (var (x2, y2) in effected)
+                {
+                    if (IsCoordValid(x2, y2) == false)
                     {
-                        isValid = false;
+                        currentValid = false;
                         break;
                     }
                 }
 
-                combo.Remove(field, hidden);
+                RemoveCombo(combo, hidden);
 
-                if (isValid)
+                if (currentValid)
                 {
-                    validCombos.Add(combo);
+                    valid.Add(combo);
                 }
             }
 
-            return validCombos;
+            return valid;
         }
 
-        public bool ApplyCommon(List<(int X, int Y)> coords, bool?[] common, SolveLog log)
+        public bool ApplyCommonCombo(List<(int X, int Y)> coords, bool?[] common, SolveLog log)
         {
             if (coords.Count != common.Length)
             {
@@ -127,32 +164,26 @@ namespace MineSolver.Solvers
 
             for (int i = 0; i < common.Length; i++)
             {
+                if (common[i] == null)
+                    continue;
+
+                int x = coords[i].X;
+                int y = coords[i].Y;
+
                 if(common[i] == true)
                 {
-                    field.Flag(coords[i].X, coords[i].Y);
+                    field.Flag(x, y);
 
-                    progress = true;
-                    log.AddMove(coords[i].X, coords[i].Y, Move.Flag);
-
-                    foreach ((int x, int y) in GetUnsolved(coords[i].X, coords[i].Y))
-                    {
-                        tryLogic[x, y] = true;
-                    }
+                    log.AddMove(x, y, Move.Flag);             
                 }
-                else if(common[i] == false)
+                else
                 { 
-                    field.Reveal(coords[i].X, coords[i].Y);
+                    field.Reveal(x, y);
 
-                    progress = true;
-                    log.AddMove(coords[i].X, coords[i].Y, Move.Reveal);
-
-                    tryLogic[coords[i].X, coords[i].Y] = true;
-
-                    foreach((int x, int y) in GetUnsolved(coords[i].X, coords[i].Y))
-                    {
-                        tryLogic[x, y] = true;
-                    }
+                    log.AddMove(x, y, Move.Reveal);
                 }
+
+                progress = true;
             }
 
             return progress;
@@ -160,26 +191,172 @@ namespace MineSolver.Solvers
 
         private bool IsCoordValid(int x, int y)
         {
-            if (field[x, y] < 0)
+            if (fieldInfo[x, y].IsValue == false)
                 return false;
 
-            int nFlags = 0;
-
-            foreach ((int xN, int yN) in field.GetNeighbors(x, y))
-            {
-                if (field[xN, yN] == -1)
-                {
-                    nFlags++;
-                }
-            }
+            int nFlags = fieldInfo[x, y].NumMines;
 
             if (nFlags > field[x, y])
                 return false;
+
+            if (fieldInfo[x, y].IsSolved)
+                return true;
 
             if (nFlags < field[x, y] && GetValidCombos(x, y).Count == 0)
                 return false;
 
             return true;
+        }
+
+        public bool?[] GetCommonCombo(List<Combo> combos)
+        {
+            var firstCombo = combos[0];
+            var length = firstCombo.Length;
+
+            bool?[] common = new bool?[length];
+
+            for (int i = 0; i < length; i++)
+            {
+                common[i] = firstCombo[i];
+
+                foreach (var combo in combos)
+                {
+                    if (combo[i] != common[i])
+                    {
+                        common[i] = null;
+                        break;
+                    }
+                }
+            }
+
+            return common;
+        }
+
+        public List<(int X, int Y)> ApplyCombo(Combo combo, List<(int X, int Y)> coords)
+        {
+            List<(int, int)> bombs = new List<(int, int)>();
+
+            if (coords.Count != combo.Length)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            for (int i = 0; i < combo.Length; i++)
+            {
+                int x = coords[i].X;
+                int y = coords[i].Y;
+
+                fieldInfo[x, y].UsedInCombo = true;
+
+                if (combo[i])
+                {
+                    field.Flag(x, y);
+                    bombs.Add(coords[i]);
+                }
+            }
+
+            return bombs;
+        }
+
+        public void RemoveCombo(Combo combo, List<(int X, int Y)> coords)
+        {
+            if (coords.Count != combo.Length)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            for (int i = 0; i < combo.Length; i++)
+            {
+                int x = coords[i].X;
+                int y = coords[i].Y;
+
+                fieldInfo[x, y].UsedInCombo = false;
+
+                if (combo[i])
+                {
+                    field.Unflag(x, y);
+                }
+            }
+        }
+
+        public List<(int X, int Y)> GetHiddenUnused(int x, int y)
+        {
+            return fieldInfo[x, y].HiddenCoords.Where(coord => fieldInfo[coord].UsedInCombo == false).ToList();
+        }
+
+        private void UpdateAffected(int x, int y)
+        {
+            fieldInfo[x, y].TryComplex = true;
+
+            HashSet<(int, int)> affected = new HashSet<(int, int)>(GetAffected(x, y));
+
+            while (affected.Count > 0)
+            {
+                HashSet<(int, int)> affectedNew = new HashSet<(int, int)>();
+
+                foreach (var (x2, y2) in affected)
+                {
+                    fieldInfo[x2, y2].TryComplex = true;
+                    affectedNew.UnionWith(GetAffected(x2, y2));
+                }
+
+                affected = affectedNew;
+            }
+        }
+
+        private List<(int X, int Y)> GetAffected(int x, int y)
+        {
+            return GetUnsolved(x, y).Where(coord => fieldInfo[coord].TryComplex == false).ToList();
+        }
+
+        private void GetAffected(IMIneField fieldOld)
+        {
+            HashSet<(int, int)> affected = new HashSet<(int, int)>();           
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    if (field[x, y] != fieldOld[x, y])                        
+                    {
+                        if (fieldInfo[x, y].IsValue)
+                        {
+                            GetAffectedHelper(x, y, affected);                           
+                        }
+                        else if (fieldInfo[x, y].IsMine)
+                        {
+                            foreach (var (x2, y2) in fieldInfo[x, y].ValueCoords)
+                            {
+                                GetAffectedHelper(x2, y2, affected);
+                            }
+                        }
+                    }
+                }
+            }
+        }      
+        
+        private void GetAffectedHelper(int x, int y, HashSet<(int, int)> affectedAll)
+        {
+            HashSet<(int, int)> affectedOld = new HashSet<(int, int)> { (x, y) };
+
+            while (true)
+            {
+                affectedOld.ExceptWith(affectedAll);
+
+                if (affectedOld.Count == 0)
+                    return;
+
+                affectedAll.UnionWith(affectedOld);
+
+                HashSet<(int, int)> affectedNew = new HashSet<(int, int)>();
+
+                foreach (var coord in affectedOld)
+                {
+                    affectedNew.UnionWith(fieldInfo[coord].ValueCoords);
+                }
+
+                affectedOld = affectedNew;
+            }
         }
     }
 }
