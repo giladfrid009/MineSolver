@@ -2,18 +2,19 @@
 using System.Linq;
 using System.Collections.Generic;
 using MineSolver.Solvers.Utils.Complex;
+using MineSolver.Solvers.Utils;
 
 namespace MineSolver.Solvers
 {
 
     public class Complex : SolverBase<CoordInfoComplex>
     {
-        private readonly Simple solverSimple;
+        private readonly SolverBase<CoordInfo> solverSimple;
         private readonly ComboLib comboLibrary;
 
-        public Complex(MineFieldBase field) : base(field)
+        public Complex(MineFieldBase field, SolverBase<CoordInfo> solverSimple) : base(field)
         {
-            solverSimple = new Simple(field);
+            this.solverSimple = solverSimple;
             comboLibrary = new ComboLib();
         }
 
@@ -137,7 +138,7 @@ namespace MineSolver.Solvers
             return valid;
         }
 
-        public bool ApplyCommonCombo(List<(int X, int Y)> coords, bool?[] common, SolveLog log)
+        private bool ApplyCommonCombo(List<(int X, int Y)> coords, bool?[] common, SolveLog log)
         {
             if (coords.Count != common.Length)
             {
@@ -192,7 +193,7 @@ namespace MineSolver.Solvers
             return true;
         }
 
-        public bool?[] GetCommonCombo(List<Combo> combos)
+        private bool?[] GetCommonCombo(List<Combo> combos)
         {
             var firstCombo = combos[0];
             var length = firstCombo.Length;
@@ -216,7 +217,7 @@ namespace MineSolver.Solvers
             return common;
         }
 
-        public List<(int X, int Y)> ApplyCombo(Combo combo, List<(int X, int Y)> coords)
+        private List<(int X, int Y)> ApplyCombo(Combo combo, List<(int X, int Y)> coords)
         {
             List<(int, int)> miness = new List<(int, int)>();
 
@@ -242,7 +243,7 @@ namespace MineSolver.Solvers
             return miness;
         }
 
-        public void RemoveCombo(Combo combo, List<(int X, int Y)> coords)
+        private void RemoveCombo(Combo combo, List<(int X, int Y)> coords)
         {
             if (coords.Count != combo.Length)
             {
@@ -263,12 +264,12 @@ namespace MineSolver.Solvers
             }
         }
 
-        public List<(int X, int Y)> GetHiddenUnused(int x, int y)
+        private List<(int X, int Y)> GetHiddenUnused(int x, int y)
         {
             return fieldInfo[x, y].GetHidden().Where(coord => fieldInfo[coord].UsedInCombo == false).ToList();
         }
 
-        public void UpdateFieldInfo(MineFieldBase oldField)
+        private void UpdateFieldInfo(MineFieldBase oldField)
         {
             for (int x = 0; x < width; x++)
             {

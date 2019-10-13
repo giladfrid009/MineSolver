@@ -25,6 +25,7 @@ namespace MineSolver.Solvers
             return log;
         }
 
+        // todo: DOESNT SOLVE EVERYTHING ALWAYS.
         private void SolveCoord(int x, int y, SolveLog log)
         {
             if (fieldInfo[x, y].IsSolved || (fieldInfo[x, y].IsValue == false))
