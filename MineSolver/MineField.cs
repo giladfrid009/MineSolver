@@ -1,60 +1,45 @@
 ﻿using System;
 using System.Text;
-using System.Collections.Generic;
 
 namespace MineSolver
 {
-    public class MineField : IMIneField
+    public class MineField : MineFieldBase
     {
         private readonly Random rnd = new Random();
 
-        public int Width { get; }
-        public int Height { get; }
-        public int ValMine { get; } = -1;
-        public int ValHidden { get; } = -2;
-        public char BombChar { get; set; } = '@';
+        public char MineChar { get; set; } = '@';
         private char HiddenChar { get; set; } = ' ';
 
-        private bool printOnline;
+        private bool printOnline = false;
 
         private readonly int[,] fieldSolved;
         private readonly int[,] fieldUnsolved;
 
-        public MineField(int width, int height, int? seed = null)
+        public MineField(int width, int height, int? seed = null) : base(width, height)
         {
-            Width = width;
-            Height = height;
-
-            fieldSolved = new int[width, height];
-            fieldUnsolved = new int[width, height];
+            fieldSolved = new int[Width, Height];
+            fieldUnsolved = new int[Width, Height];
 
             rnd = seed == null ? new Random() : new Random(seed.Value);
-
-            PrintOnlineDisable();
         }
 
-        public int this[int x, int y]
+        public override int this[int x, int y]
         {
             get => fieldUnsolved[x, y];
         }
 
-        public int this[(int x, int y) coord]
-        {
-            get => fieldUnsolved[coord.x, coord.y];
-        }
-
-        public bool Reveal(int x, int y)
+        public override bool Reveal(int x, int y)
         {
             if (fieldUnsolved[x, y] >= 0)
                 return true;
 
             var coordVal = fieldSolved[x, y];
 
-            if (coordVal == ValHidden)
+            if (coordVal == Hidden)
             {
                 throw new Exception("Field not properly initialized.");
             }
-            else if (coordVal == ValMine)
+            else if (coordVal == Mine)
             {
                 throw new Exception("You lost.");
                 return false;
@@ -78,9 +63,9 @@ namespace MineSolver
             return true;
         }
 
-        public void Flag(int x, int y)
+        public override void Flag(int x, int y)
         {
-            fieldUnsolved[x, y] = ValMine;
+            fieldUnsolved[x, y] = Mine;
 
             if(printOnline)
             {
@@ -88,9 +73,9 @@ namespace MineSolver
             }
         }
 
-        public void Unflag(int x, int y)
+        public override void Unflag(int x, int y)
         {
-            fieldUnsolved[x, y] = ValHidden;
+            fieldUnsolved[x, y] = Hidden;
 
             if (printOnline)
             {
@@ -104,58 +89,19 @@ namespace MineSolver
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    fieldSolved[x, y] = ValHidden;
-                    fieldUnsolved[x, y] = ValHidden;
+                    fieldSolved[x, y] = Hidden;
+                    fieldUnsolved[x, y] = Hidden;
                 }
             }
         }
 
-        public bool IsSolved()
-        {
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    if (fieldUnsolved[x, y] != fieldSolved[x, y])
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        protected List<(int, int)> GetNeighbors(int x, int y)
-        {
-            List<(int, int)> neighbors = new List<(int, int)>(3);
-
-            int xLow = Math.Max(0, x - 1);
-            int xHigh = Math.Min(x + 1, Width - 1);
-            int yLow = Math.Max(0, y - 1);
-            int yHigh = Math.Min(y + 1, Height - 1);
-
-            for (int xNeighbor = xLow; xNeighbor <= xHigh; xNeighbor++)
-            {
-                for (int yNeighbor = yLow; yNeighbor <= yHigh; yNeighbor++)
-                {
-                    if (xNeighbor == x && yNeighbor == y)
-                        continue;
-
-                    neighbors.Add((xNeighbor, yNeighbor));
-                }
-            }
-
-            return neighbors;
-        }
-
-        public void Generate(double bombPrecent, int xOrigin, int yOrigin, int originSize = 2)
+        public void Generate(double minePrecent, int xOrigin, int yOrigin, int originSize = 2)
         {
             Reset();
 
             GenerateOrigin(xOrigin, yOrigin, originSize);
 
-            GenerateBombs((int)(bombPrecent * Width * Height));
+            GenerateMines((int)(minePrecent * Width * Height));
 
             GenerateVals();
         }
@@ -173,9 +119,9 @@ namespace MineSolver
             }
         }
 
-        private void GenerateBombs(int nBombs)
+        private void GenerateMines(int nMines)
         {
-            for (int i = 0; i < nBombs; i++)
+            for (int i = 0; i < nMines; i++)
             {
                 int xB;
                 int yB;
@@ -185,9 +131,9 @@ namespace MineSolver
                     xB = rnd.Next(0, Width);
                     yB = rnd.Next(0, Height);
                 }
-                while (fieldSolved[xB, yB] != ValHidden);
+                while (fieldSolved[xB, yB] != Hidden);
 
-                fieldSolved[xB, yB] = ValMine;
+                fieldSolved[xB, yB] = Mine;
             }
         }
 
@@ -197,14 +143,14 @@ namespace MineSolver
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    if (fieldSolved[x, y] == ValMine)
+                    if (fieldSolved[x, y] == Mine)
                         continue;
 
                     fieldSolved[x, y] = 0;
 
                     foreach (var (x2, y2) in GetNeighbors(x, y))
                     {
-                        if (fieldSolved[x2, y2] == ValMine)
+                        if (fieldSolved[x2, y2] == Mine)
                         {
                             fieldSolved[x, y]++;
                         }
@@ -228,13 +174,13 @@ namespace MineSolver
                 {
                     var coordVal = fieldUnsolved[x, y];
 
-                    if (coordVal == ValHidden)
+                    if (coordVal == Hidden)
                     {
                         str.Append(HiddenChar);
                     }
-                    else if (coordVal == ValMine)
+                    else if (coordVal == Mine)
                     {
-                        str.Append(BombChar);
+                        str.Append(MineChar);
                     }
                     else if (coordVal >= 0)
                     {
@@ -251,14 +197,14 @@ namespace MineSolver
             Console.Write(str);
         }
 
-        public void PrintOnlineEnable()
+        public void EnablePrintOnline()
         {
             Console.Clear();
             Print();
             printOnline = true;
         }
 
-        public void PrintOnlineDisable()
+        public void DisablePrintOnline()
         {
             printOnline = false;
         }
@@ -269,14 +215,14 @@ namespace MineSolver
 
             var coordVal = fieldUnsolved[x, y];
 
-            if (coordVal == ValHidden)
+            if (coordVal == Hidden)
             {
                 Console.Write(HiddenChar);
             }
-            else if (coordVal == ValMine)
+            else if (coordVal == Mine)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(BombChar);
+                Console.Write(MineChar);
                 Console.ForegroundColor = ConsoleColor.Gray;
             }
             else if (coordVal >= 0)
@@ -289,7 +235,7 @@ namespace MineSolver
             }
         }
 
-        public IMIneField Copy()
+        public override MineFieldBase Copy()
         {
             MineField copy = new MineField(Width, Height);
 

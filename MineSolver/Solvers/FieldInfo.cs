@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
-namespace MineSolver
+namespace MineSolver.Solvers
 {
     public class FieldInfo<TCoordInfo> where TCoordInfo : CoordInfo, new()
     {
@@ -8,11 +9,11 @@ namespace MineSolver
         public int Height { get => field.Height; }
         public bool IsSolved { get => IsSolvedFunc(); }
 
-        private readonly IMIneField field;
+        private readonly MineFieldBase field;
 
         private readonly TCoordInfo[,] coordsInfo;
 
-        public FieldInfo(IMIneField field)
+        public FieldInfo(MineFieldBase field)
         {
             this.field = field;
             coordsInfo = new TCoordInfo[Width, Height];

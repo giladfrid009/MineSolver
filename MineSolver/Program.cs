@@ -7,19 +7,29 @@ namespace MineSolver
     {
         static void Main()
         {
-            MineField field = new MineField(250, 65, 3);
+            MineField field = new MineField(250, 65, 6);
 
             field.Generate(0.23, field.Width / 2, field.Height / 2, 2);
             field.Reveal(field.Width / 2, field.Height / 2);
 
-            field.PrintOnlineEnable();
+            field.EnablePrintOnline();
 
             SolverComplex solverComplex = new SolverComplex(field);
             solverComplex.Solve();
 
-            //Console.WriteLine(TestSpeed(field, solverSimple, 1000));
-            //Console.WriteLine(TestSpeed(field, solverComplex, 1000));
+            //SolverSimple solverSimple = new SolverSimple(field);
 
+            //solverRecursive.Solve(); 
+
+            //Console.ReadKey();
+
+            //solverRecursive.Solve();
+
+            //solverSimple.Solve();
+
+            //Console.ReadKey();
+
+            //Console.WriteLine(TestSpeed(field, solverSimple, 100));
 
             Console.ReadKey();
 

@@ -1,38 +1,56 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 
-namespace MineSolver
+namespace MineSolver.Solvers
 {
     public class CoordInfo
     {
-        public IMIneField Field { get; set; }
+        public MineFieldBase Field { get; set; }
 
-        public bool IsSolved { get => IsSolvedFunc(); }
-        public bool IsRevealed { get => Value != Field.ValHidden ? true : false; }
-        public bool IsMine { get => Value == Field.ValMine ? true : false; }
+        public bool IsRevealed { get => Value != MineFieldBase.Hidden ? true : false; }
+        public bool IsMine { get => Value == MineFieldBase.Mine ? true : false; }
         public bool IsValue { get => IsRevealed && !IsMine; }
+        public bool IsSolved { get => IsSolvedFunc(); }
         public int X { get; set; }
         public int Y { get; set; }
         public int Value { get => Field[X, Y]; }
-        public int NumMines { get => NumFlagsFunc(); }
+        public int NumMines { get => NumMinesFunc(); }
         public int NumHidden { get => NumHiddenFunc(); }
-        public List<(int X, int Y)> NeighborCoords { get => GetNeighbors(); }
-        public List<(int X, int Y)> HiddenCoords { get => GetHidden(); }
-        public List<(int X, int Y)> ValueCoords { get => GetValues(); }
-        public List<(int X, int Y)> MineCoords { get => GetMines(); }
 
         private bool isSolvedCache;
         private List<(int, int)> neighborsCache;
+  
+        public List<(int, int)> GetNeighbors()
+        {
+            if (neighborsCache != null)
+                return neighborsCache;
+
+            return neighborsCache = Field.GetNeighbors(X, Y);
+        }
+
+        public List<(int X, int Y)> GetHidden()
+        {
+            return GetNeighbors().Where(coord => Field[coord] == MineFieldBase.Hidden).ToList();
+        }
+
+        public List<(int X, int Y)> GetMines()
+        {
+            return GetNeighbors().Where(coord => Field[coord] == MineFieldBase.Mine).ToList();
+        }
+
+        public List<(int X, int Y)> GetValues()
+        {
+            return GetNeighbors().Where(coord => (Field[coord] != MineFieldBase.Hidden) && (Field[coord] != MineFieldBase.Mine)).ToList();
+        }
 
         private bool IsSolvedFunc()
         {
             if (isSolvedCache == true)
                 return true;
 
-            foreach (var coord in NeighborCoords)
+            foreach (var coord in GetNeighbors())
             {
-                if (Field[coord] == Field.ValHidden)
+                if (Field[coord] == MineFieldBase.Hidden)
                     return false;
             }
 
@@ -41,71 +59,30 @@ namespace MineSolver
             return true;
         }
 
-        private int NumFlagsFunc()
+        private int NumMinesFunc()
         {
-            int nFlags = 0;
+            int nMines = 0;
 
-            foreach (var coord in NeighborCoords)
+            foreach (var coord in GetNeighbors())
             {
-                if (Field[coord] == Field.ValMine)
-                    nFlags++;          
+                if (Field[coord] == MineFieldBase.Mine)
+                    nMines++;
             }
 
-            return nFlags;
+            return nMines;
         }
 
         private int NumHiddenFunc()
         {
             int nHidden = 0;
 
-            foreach (var coord in NeighborCoords)
+            foreach (var coord in GetNeighbors())
             {
-                if (Field[coord] == Field.ValHidden)
+                if (Field[coord] == MineFieldBase.Hidden)
                     nHidden++;
             }
 
             return nHidden;
-        }
-
-        private List<(int, int)> GetNeighbors()
-        {
-            if (neighborsCache != null)
-                return neighborsCache;
-
-            neighborsCache = new List<(int, int)>(3);
-
-            int xLow = Math.Max(0, X - 1);
-            int xHigh = Math.Min(X + 1, Field.Width - 1);
-            int yLow = Math.Max(0, Y - 1);
-            int yHigh = Math.Min(Y + 1, Field.Height - 1);
-
-            for (int xNeighbor = xLow; xNeighbor <= xHigh; xNeighbor++)
-            {
-                for (int yNeighbor = yLow; yNeighbor <= yHigh; yNeighbor++)
-                {
-                    if (xNeighbor == X && yNeighbor == Y)
-                        continue;
-
-                    neighborsCache.Add((xNeighbor, yNeighbor));
-                }
-            }
-
-            return neighborsCache;
-        }
-
-        private List<(int X, int Y)> GetHidden()
-        {
-            return NeighborCoords.Where(coord => Field[coord] == Field.ValHidden).ToList();
-        }
-
-        private List<(int X, int Y)> GetValues()
-        {
-            return NeighborCoords.Where(coord => (Field[coord] != Field.ValHidden) && (Field[coord] != Field.ValMine)).ToList();
-        }
-
-        private List<(int X, int Y)> GetMines()
-        {
-            return NeighborCoords.Where(coord => Field[coord] == Field.ValMine).ToList();
         }
     }
 }
