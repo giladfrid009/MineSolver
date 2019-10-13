@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 
-namespace MineSolver.Solvers
+namespace MineSolver.Solvers.Utils
 {
     public class CoordInfo
     {

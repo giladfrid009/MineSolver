@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace MineSolver.Solvers
+namespace MineSolver.Solvers.Utils
 {
     public class FieldInfo<TCoordInfo> where TCoordInfo : CoordInfo, new()
     {

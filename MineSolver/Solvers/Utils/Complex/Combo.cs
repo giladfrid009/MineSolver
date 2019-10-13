@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace MineSolver.Solvers.Complex
+﻿namespace MineSolver.Solvers.Utils.Complex
 {
     public class Combo
     {
         public int Length { get; }
-        public int NumFlags { get; }
+        public int NumMines { get; }
 
         private readonly bool[] comboVals;
 
@@ -22,7 +19,7 @@ namespace MineSolver.Solvers.Complex
 
                 if (this.comboVals[i])
                 {
-                    NumFlags++;
+                    NumMines++;
                 }
             }
         }

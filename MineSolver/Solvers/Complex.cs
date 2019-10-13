@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using MineSolver.Solvers.Complex;
+using MineSolver.Solvers.Utils.Complex;
 
 namespace MineSolver.Solvers
 {
 
-    public class SolverComplex : SolverBase<CoordInfoComplex>
+    public class Complex : SolverBase<CoordInfoComplex>
     {
-        private readonly SolverSimple solverSimple;
-        private readonly ComboLibrary comboLibrary;
+        private readonly Simple solverSimple;
+        private readonly ComboLib comboLibrary;
 
-        public SolverComplex(MineFieldBase field) : base(field)
+        public Complex(MineFieldBase field) : base(field)
         {
-            solverSimple = new SolverSimple(field);
-            comboLibrary = new ComboLibrary();
+            solverSimple = new Simple(field);
+            comboLibrary = new ComboLib();
         }
 
         private void Reset()
@@ -73,8 +73,12 @@ namespace MineSolver.Solvers
                 return false;
             }
 
-            // todo: fucks me somewhere (maybe). find and fix.
             fieldInfo[x, y].TryComplex = false;
+
+            if (fieldInfo[x, y].IsSolved || (fieldInfo[x, y].IsValue == false))
+            {
+                return false;
+            }
 
             var combos = GetValidCombos(x, y);            
             var common = GetCommonCombo(combos);
@@ -174,15 +178,15 @@ namespace MineSolver.Solvers
             if (fieldInfo[x, y].IsValue == false)
                 return false;
 
-            int nFlags = fieldInfo[x, y].NumMines;
+            int nMines = fieldInfo[x, y].NumMines;
 
-            if (nFlags > field[x, y])
+            if (nMines > field[x, y])
                 return false;
 
             if (fieldInfo[x, y].IsSolved)
                 return true;
 
-            if (nFlags < field[x, y] && GetValidCombos(x, y).Count == 0)
+            if (nMines < field[x, y] && GetValidCombos(x, y).Count == 0)
                 return false;
 
             return true;
@@ -274,13 +278,13 @@ namespace MineSolver.Solvers
                     {
                         if (fieldInfo[x, y].IsValue)
                         {
-                            UpdateCoordInfo(x, y);
+                            EnableTryComplex(x, y);
                         }
                         else
                         {
-                            foreach (var (x2, y2) in fieldInfo[x, y].GetValues())
+                            foreach (var (x2, y2) in GetUnsolved(x, y))
                             {
-                                UpdateCoordInfo(x2, y2);
+                                EnableTryComplex(x2, y2);
                             }
                         }
                     }
@@ -289,24 +293,17 @@ namespace MineSolver.Solvers
 
         }
 
-        private void UpdateCoordInfo(int x, int y)
+        private void EnableTryComplex(int x, int y)
         {
+            if (fieldInfo[x, y].TryComplex)
+                return;
+
             fieldInfo[x, y].TryComplex = true;
 
-            var affected = new HashSet<(int, int)>(GetUnsolved(x, y).Where(coord => fieldInfo[coord].TryComplex == false));
-
-            while (affected.Count > 0)
+            foreach (var (x2, y2) in GetUnsolved(x, y))
             {
-                var affectedNew = new HashSet<(int, int)>();
-
-                foreach (var (x2, y2) in affected)
-                {
-                    fieldInfo[x2, y2].TryComplex = true;
-                    affectedNew.UnionWith(GetUnsolved(x, y).Where(coord => fieldInfo[coord].TryComplex == false));
-                }
-
-                affected = affectedNew;
-            }      
-        }        
+                EnableTryComplex(x2, y2);
+            }
+        }
     }
 }

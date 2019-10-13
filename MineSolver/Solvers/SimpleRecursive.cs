@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using MineSolver.Solvers.Utils;
 
 namespace MineSolver.Solvers
 {
-    public class SolverSimple : SolverBase<CoordInfo>
+    public class SimpleRecursive : SolverBase<CoordInfo>
     {
-        public SolverSimple(MineFieldBase field) : base(field)
+        public SimpleRecursive(MineFieldBase field) : base(field)
         {
 
         }
@@ -17,14 +18,14 @@ namespace MineSolver.Solvers
             {
                 for (int y = 0; y < height; y++)
                 {
-                    SolveLogic(x, y, log);
+                    SolveCoord(x, y, log);
                 }
             }
 
             return log;
         }
 
-        protected void SolveLogic(int x, int y, SolveLog log)
+        private void SolveCoord(int x, int y, SolveLog log)
         {
             if (fieldInfo[x, y].IsSolved || (fieldInfo[x, y].IsValue == false))
             {
@@ -77,7 +78,7 @@ namespace MineSolver.Solvers
 
             foreach(var (x2, y2) in affected)
             {
-                SolveLogic(x2, y2, log);
+                SolveCoord(x2, y2, log);
             }
         }
     }

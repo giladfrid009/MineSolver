@@ -1,20 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace MineSolver.Solvers.Complex
+namespace MineSolver.Solvers.Utils.Complex
 {
-    public class ComboLibrary
+    public class ComboLib
     {
         private Combo[][][] combos;
 
-        public ComboLibrary()
+        public ComboLib()
         {
             GenerateComboLibrary();
         }
 
-        public Combo[] this[int nHidden, int nFlags]
+        public Combo[] this[int nHidden, int nMines]
         {
-            get => combos[nHidden][nFlags];
+            get => combos[nHidden][nMines];
         }
 
         private void GenerateComboLibrary()
@@ -27,9 +27,9 @@ namespace MineSolver.Solvers.Complex
 
                 var combosOfLength = GenerateCombosOfLength(nHidden, 0, new bool[nHidden]);
 
-                for (int nFlags = 0; nFlags <= nHidden; nFlags++)
+                for (int nMines = 0; nMines <= nHidden; nMines++)
                 {
-                    combos[nHidden][nFlags] = combosOfLength.Where(C => C.NumFlags == nFlags).ToArray();
+                    combos[nHidden][nMines] = combosOfLength.Where(C => C.NumMines == nMines).ToArray();
                 }
             }
         }

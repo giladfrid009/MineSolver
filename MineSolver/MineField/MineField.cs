@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Text;
+using System.Collections.Generic;
 
 namespace MineSolver
 {
     public class MineField : MineFieldBase
     {
         private readonly Random rnd = new Random();
-
-        public char MineChar { get; set; } = '@';
-        private char HiddenChar { get; set; } = ' ';
-
-        private bool printOnline = false;
 
         private readonly int[,] fieldSolved;
         private readonly int[,] fieldUnsolved;
@@ -28,10 +23,10 @@ namespace MineSolver
             get => fieldUnsolved[x, y];
         }
 
-        public override bool Reveal(int x, int y)
+        public override int Reveal(int x, int y)
         {
             if (fieldUnsolved[x, y] >= 0)
-                return true;
+                return fieldUnsolved[x, y];
 
             var coordVal = fieldSolved[x, y];
 
@@ -41,8 +36,8 @@ namespace MineSolver
             }
             else if (coordVal == Mine)
             {
+                // todo: remove eventially
                 throw new Exception("You lost.");
-                return false;
             }
 
             fieldUnsolved[x, y] = coordVal;
@@ -55,32 +50,23 @@ namespace MineSolver
                 }
             }
 
-            if (printOnline)
-            {
-                PrintCoord(x, y);
-            }
+            RaiseOnReveal(x, y, fieldUnsolved[x, y]);
 
-            return true;
+            return fieldUnsolved[x, y];
         }
 
         public override void Flag(int x, int y)
         {
             fieldUnsolved[x, y] = Mine;
 
-            if(printOnline)
-            {
-                PrintCoord(x, y);
-            }
+            RaiseOnFlag(x, y);
         }
 
         public override void Unflag(int x, int y)
         {
             fieldUnsolved[x, y] = Hidden;
 
-            if (printOnline)
-            {
-                PrintCoord(x, y);
-            }
+            RaiseOnUnflag(x, y);
         }
 
         public void Reset()
@@ -121,19 +107,29 @@ namespace MineSolver
 
         private void GenerateMines(int nMines)
         {
+            List<(int, int)> freeCoords = new List<(int, int)>(Width * Height);
+
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    if (fieldSolved[x, y] == Hidden)
+                        freeCoords.Add((x, y));
+                }
+            }
+
             for (int i = 0; i < nMines; i++)
             {
-                int xB;
-                int yB;
+                if (freeCoords.Count == 0)
+                    return;
 
-                do
-                {
-                    xB = rnd.Next(0, Width);
-                    yB = rnd.Next(0, Height);
-                }
-                while (fieldSolved[xB, yB] != Hidden);
+                int index = rnd.Next(0, freeCoords.Count);
 
-                fieldSolved[xB, yB] = Mine;
+                var (x, y) = freeCoords[index];
+
+                fieldSolved[x, y] = Mine;
+
+                freeCoords.RemoveAt(index);
             }
         }
 
@@ -156,82 +152,6 @@ namespace MineSolver
                         }
                     }
                 }
-            }
-        }
-
-        public void Print()
-        {
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.CursorVisible = false;
-            Console.WindowWidth = Console.LargestWindowWidth;
-            Console.WindowHeight = Console.LargestWindowHeight;
-
-            StringBuilder str = new StringBuilder(Width * Height + 2 * Height);
-
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    var coordVal = fieldUnsolved[x, y];
-
-                    if (coordVal == Hidden)
-                    {
-                        str.Append(HiddenChar);
-                    }
-                    else if (coordVal == Mine)
-                    {
-                        str.Append(MineChar);
-                    }
-                    else if (coordVal >= 0)
-                    {
-                        str.Append(coordVal);
-                    }
-                    else
-                    {
-                        throw new ArgumentOutOfRangeException("Unsupported value.");
-                    }
-                }
-                str.Append("\n");
-            }
-
-            Console.Write(str);
-        }
-
-        public void EnablePrintOnline()
-        {
-            Console.Clear();
-            Print();
-            printOnline = true;
-        }
-
-        public void DisablePrintOnline()
-        {
-            printOnline = false;
-        }
-
-        private void PrintCoord(int x, int y)
-        {
-            Console.SetCursorPosition(x, y);
-
-            var coordVal = fieldUnsolved[x, y];
-
-            if (coordVal == Hidden)
-            {
-                Console.Write(HiddenChar);
-            }
-            else if (coordVal == Mine)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(MineChar);
-                Console.ForegroundColor = ConsoleColor.Gray;
-            }
-            else if (coordVal >= 0)
-            {
-                Console.Write(coordVal);
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException("Unsupported value.");
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
+using MineSolver.Solvers.Utils;
 
 namespace MineSolver.Solvers
 {
