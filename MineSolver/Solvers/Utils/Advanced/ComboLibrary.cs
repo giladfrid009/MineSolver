@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace MineSolver.Solvers.Utils.Complex
+namespace MineSolver.Solvers.Utils.Advanced
 {
     public class ComboLib
     {

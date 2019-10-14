@@ -1,4 +1,4 @@
-﻿namespace MineSolver.Solvers.Utils.Complex
+﻿namespace MineSolver.Solvers.Utils.Advanced
 {
     public class Combo
     {

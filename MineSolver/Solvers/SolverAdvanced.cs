@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using MineSolver.Solvers.Utils.Complex;
+using MineSolver.Solvers.Utils.Advanced;
 using MineSolver.Solvers.Utils;
 
 namespace MineSolver.Solvers
 {
-
-    public class Complex : SolverBase<CoordInfoComplex>
+    public class SolverAdvanced : SolverBase<CoordDataAdvanced>
     {
-        private readonly SolverBase<CoordInfo> solverSimple;
+        private readonly SolverBase<CoordData> solverBasic;
         private readonly ComboLib comboLibrary;
 
         // todo: maybe make an interface for a secondary solver which depends on another solver?
-        public Complex(MineFieldBase field, SolverBase<CoordInfo> solverSimple) : base(field)
+        // i.e create interface solver initial, solver secondary and such
+        public SolverAdvanced(MineFieldBase field, SolverBase<CoordData> solverBasic) : base(field)
         {
-            this.solverSimple = solverSimple;
+            this.solverBasic = solverBasic;
             comboLibrary = new ComboLib();
         }
 
@@ -25,7 +25,7 @@ namespace MineSolver.Solvers
             {
                 for (int y = 0; y < height; y++)
                 {
-                    fieldInfo[x, y].TryComplex = true;
+                    fieldData[x, y].TryAdvanced = true;
                 }
             }
         }
@@ -44,7 +44,7 @@ namespace MineSolver.Solvers
 
                 progress = false;
 
-                log.Combine(solverSimple.Solve());
+                log.Combine(solverBasic.Solve());
 
                 for (int x = 0; x < width; x++)
                 {
@@ -70,21 +70,21 @@ namespace MineSolver.Solvers
 
         private bool SolveCoord(int x, int y, SolveLog log)
         {
-            if (fieldInfo[x, y].TryComplex == false)
+            if (fieldData[x, y].TryAdvanced == false)
             {
                 return false;
             }
 
-            fieldInfo[x, y].TryComplex = false;
+            fieldData[x, y].TryAdvanced = false;
 
-            if (fieldInfo[x, y].IsSolved || (fieldInfo[x, y].IsValue == false))
+            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
             {
                 return false;
             }
 
             var combos = GetValidCombos(x, y);            
             var common = GetCommonCombo(combos);
-            var hidden = fieldInfo[x, y].GetHidden();
+            var hidden = GetHidden(x, y);
 
             return ApplyCommonCombo(hidden, common, log);
         }
@@ -93,7 +93,7 @@ namespace MineSolver.Solvers
         {
             List<Combo> valid = new List<Combo>();
 
-            int nFlagsToComplete = field[x, y] - fieldInfo[x, y].NumMines;
+            int nFlagsToComplete = field[x, y] - fieldData[x, y].NumMines;
 
             var hidden = GetHiddenUnused(x, y);
 
@@ -112,9 +112,9 @@ namespace MineSolver.Solvers
 
                 var mines = ApplyCombo(combo, hidden);
 
-                foreach (var mine in mines)
+                foreach (var (x2, y2) in mines)
                 {
-                    effected.UnionWith(fieldInfo[mine].GetValues());
+                    effected.UnionWith(GetValues(x2, y2));
                 }
 
                 bool currentValid = true;
@@ -177,15 +177,15 @@ namespace MineSolver.Solvers
 
         private bool IsCoordValid(int x, int y)
         {
-            if (fieldInfo[x, y].IsValue == false)
+            if (fieldData[x, y].IsValue == false)
                 return false;
 
-            int nMines = fieldInfo[x, y].NumMines;
+            int nMines = fieldData[x, y].NumMines;
 
             if (nMines > field[x, y])
                 return false;
 
-            if (fieldInfo[x, y].IsSolved)
+            if (fieldData[x, y].IsSolved)
                 return true;
 
             if (nMines < field[x, y] && GetValidCombos(x, y).Count == 0)
@@ -232,7 +232,7 @@ namespace MineSolver.Solvers
                 int x = coords[i].X;
                 int y = coords[i].Y;
 
-                fieldInfo[x, y].UsedInCombo = true;
+                fieldData[x, y].UsedInCombo = true;
 
                 if (combo[i])
                 {
@@ -256,7 +256,7 @@ namespace MineSolver.Solvers
                 int x = coords[i].X;
                 int y = coords[i].Y;
 
-                fieldInfo[x, y].UsedInCombo = false;
+                fieldData[x, y].UsedInCombo = false;
 
                 if (combo[i])
                 {
@@ -267,7 +267,7 @@ namespace MineSolver.Solvers
 
         private List<(int X, int Y)> GetHiddenUnused(int x, int y)
         {
-            return fieldInfo[x, y].GetHidden().Where(coord => fieldInfo[coord].UsedInCombo == false).ToList();
+            return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
         }
 
         private void UpdateFieldInfo(MineFieldBase oldField)
@@ -278,7 +278,7 @@ namespace MineSolver.Solvers
                 {
                     if (oldField[x, y] != field[x, y])
                     {
-                        if (fieldInfo[x, y].IsValue)
+                        if (fieldData[x, y].IsValue)
                         {
                             EnableTryComplex(x, y);
                         }
@@ -297,10 +297,10 @@ namespace MineSolver.Solvers
 
         private void EnableTryComplex(int x, int y)
         {
-            if (fieldInfo[x, y].TryComplex)
+            if (fieldData[x, y].TryAdvanced)
                 return;
 
-            fieldInfo[x, y].TryComplex = true;
+            fieldData[x, y].TryAdvanced = true;
 
             foreach (var (x2, y2) in GetUnsolved(x, y))
             {

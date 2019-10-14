@@ -1,5 +1,6 @@
 ﻿using System;
-using MineSolver.Benchmarks;
+using MineSolver.Solvers;
+using MineSolver.Solvers.Utils;
 
 namespace MineSolver
 {
@@ -7,23 +8,25 @@ namespace MineSolver
     {
         static void Main()
         {
-            MineField field = new MineField(250, 65, 4);
+            MineField field = new MineField(250, 65);
 
-            //OnlineGraphics.Subscibe(field);
+            OnlineGraphics.Subscibe(field);
 
-            field.Generate(0.23, field.Width / 2, field.Height / 2, 3);
-            field.Reveal(field.Width / 2, field.Height / 2);
+            SolverBasic solverSimple = new SolverBasic(field);
+            SolverAdvanced solverComplex1 = new SolverAdvanced(field, solverSimple);
 
-            Solvers.Simple solverSimple = new Solvers.Simple(field);
-            Solvers.Complex solverComplex = new Solvers.Complex(field, solverSimple);
+            SolverBasicRecursive solverSimpleRecursive = new SolverBasicRecursive(field);
+            SolverAdvanced solverComplex2 = new SolverAdvanced(field, solverSimpleRecursive);
 
-            Solvers.SimpleRecursive solverSimpleRecursive = new Solvers.SimpleRecursive(field);
-            Solvers.Complex solverComplex2 = new Solvers.Complex(field, solverSimpleRecursive);
+            field.Generate(0.2, 3, 3, 2);
+            field.Reveal(3, 3);
 
-            Console.WriteLine(Benchmark.TestSpeed(field, solverSimple, 1000));
-            Console.WriteLine(Benchmark.TestSpeed(field, solverComplex, 1000));
-            Console.WriteLine(Benchmark.TestSpeed(field, solverSimpleRecursive, 1000));
-            Console.WriteLine(Benchmark.TestSpeed(field, solverComplex2, 1000));
+            solverComplex1.Solve();
+
+            Console.WriteLine(Benchmarks.TestSpeed(field, solverSimple, 1000));
+            Console.WriteLine(Benchmarks.TestSpeed(field, solverComplex1, 1000));
+            Console.WriteLine(Benchmarks.TestSpeed(field, solverSimpleRecursive, 1000));
+            Console.WriteLine(Benchmarks.TestSpeed(field, solverComplex2, 1000));
 
             Console.ReadKey();
         }

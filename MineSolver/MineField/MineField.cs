@@ -25,7 +25,7 @@ namespace MineSolver
 
         public override int Reveal(int x, int y)
         {
-            if (fieldUnsolved[x, y] >= 0)
+            if (fieldUnsolved[x, y] != Hidden)
                 return fieldUnsolved[x, y];
 
             var coordVal = fieldSolved[x, y];

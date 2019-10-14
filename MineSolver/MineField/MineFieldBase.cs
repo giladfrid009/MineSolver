@@ -23,8 +23,8 @@ namespace MineSolver
         {
             Width = width;
             Height = height;
-
         }
+
 
         public abstract int this[int x, int y] { get; }
 
@@ -102,7 +102,6 @@ namespace MineSolver
 
             Console.Write(str);
         }
-
 
         public abstract MineFieldBase Copy();
     }

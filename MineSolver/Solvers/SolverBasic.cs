@@ -3,9 +3,9 @@ using MineSolver.Solvers.Utils;
 
 namespace MineSolver.Solvers
 {
-    public class Simple : SolverBase<CoordInfo>
+    public class SolverBasic : SolverBase<CoordData>
     {
-        public Simple(MineFieldBase field) : base(field)
+        public SolverBasic(MineFieldBase field) : base(field)
         {
 
         }
@@ -18,15 +18,15 @@ namespace MineSolver.Solvers
             {
                 for (int y = 0; y < height; y++)
                 {
-                    var pending = new HashSet<(int, int)> { (x, y) };
+                    var pending = new List<(int, int)> { (x, y) };
 
                     while (pending.Count > 0)
                     {
-                        var pendingNew = new HashSet<(int, int)>();
+                        var pendingNew = new List<(int, int)>();
 
                         foreach (var (x2, y2) in pending)
                         {
-                            pendingNew.UnionWith(SolveCoord(x2, y2, log));
+                            pendingNew.AddRange(SolveCoord(x2, y2, log));
                         }
 
                         pending = pendingNew;
@@ -37,21 +37,21 @@ namespace MineSolver.Solvers
             return log;
         }
 
-        private HashSet<(int X, int Y)> SolveCoord(int x, int y, SolveLog log)
+        private List<(int X, int Y)> SolveCoord(int x, int y, SolveLog log)
         {
-            var affected = new HashSet<(int, int)>();
+            var affected = new List<(int, int)>();
 
-            if (fieldInfo[x, y].IsSolved || (fieldInfo[x, y].IsValue == false))
+            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
             {
                 return affected;
             }
 
-            int nHidden = fieldInfo[x, y].NumHidden;
-            int nMines = fieldInfo[x, y].NumMines;
+            int nHidden = fieldData[x, y].NumHidden;
+            int nMines = fieldData[x, y].NumMines;
 
             if (field[x, y] == nMines)
             {
-                var hidden = fieldInfo[x, y].GetHidden();
+                var hidden = GetHidden(x, y);
 
                 foreach (var (x2, y2) in hidden)
                 {
@@ -65,23 +65,23 @@ namespace MineSolver.Solvers
                     {
                         var opened = GetAreaBounds(x2, y2);
 
-                        affected.UnionWith(opened);
+                        affected.AddRange(opened);
 
                         foreach(var (x3, y3) in opened)
                         {
-                            affected.UnionWith(GetUnsolved(x3, y3));
+                            affected.AddRange(GetUnsolved(x3, y3));
                         }
                     }
                     else
                     {
                         affected.Add((x2, y2));
-                        affected.UnionWith(GetUnsolved(x2, y2));
+                        affected.AddRange(GetUnsolved(x2, y2));
                     }
                 }
             }
             else if (nHidden == field[x, y] - nMines)
             {
-                var hidden = fieldInfo[x, y].GetHidden();
+                var hidden = GetHidden(x, y);
 
                 foreach (var (x2, y2) in hidden)
                 {
@@ -91,7 +91,7 @@ namespace MineSolver.Solvers
 
                 foreach (var (x2, y2) in hidden)
                 {
-                    affected.UnionWith(GetUnsolved(x2, y2));
+                    affected.AddRange(GetUnsolved(x2, y2));
                 }
             }
 
