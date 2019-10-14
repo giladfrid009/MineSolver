@@ -1,5 +1,5 @@
 ﻿using System;
-using MineSolver.Solvers;
+using MineSolver.Benchmarks;
 
 namespace MineSolver
 {
@@ -9,24 +9,16 @@ namespace MineSolver
         {
             MineField field = new MineField(250, 65, 4);
 
-            OnlineGraphics.Subscibe(field);
+            //OnlineGraphics.Subscibe(field);
 
             field.Generate(0.23, field.Width / 2, field.Height / 2, 3);
             field.Reveal(field.Width / 2, field.Height / 2);
 
-            Simple solverSimple = new Simple(field);
-            Complex solverComplex = new Complex(field, solverSimple);
+            Solvers.Simple solverSimple = new Solvers.Simple(field);
+            Solvers.Complex solverComplex = new Solvers.Complex(field, solverSimple);
 
-            SimpleRecursive solverSimpleRecursive = new SimpleRecursive(field);
-            Complex solverComplex2 = new Complex(field, solverSimpleRecursive);
-
-            solverSimpleRecursive.Solve();
-
-            Console.ReadKey();
-
-            solverSimple.Solve();
-
-            Console.ReadKey();
+            Solvers.SimpleRecursive solverSimpleRecursive = new Solvers.SimpleRecursive(field);
+            Solvers.Complex solverComplex2 = new Solvers.Complex(field, solverSimpleRecursive);
 
             Console.WriteLine(Benchmark.TestSpeed(field, solverSimple, 1000));
             Console.WriteLine(Benchmark.TestSpeed(field, solverComplex, 1000));

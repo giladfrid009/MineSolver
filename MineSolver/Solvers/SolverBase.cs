@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using MineSolver.Solvers.Utils;
 
@@ -26,7 +27,19 @@ namespace MineSolver.Solvers
             return fieldInfo[x, y].GetValues().Where(coord => fieldInfo[coord].IsSolved == false).ToList();
         }             
 
-        protected void GetOpenedAreaRecursive(int x, int y, HashSet<(int, int)> coords)
+        protected HashSet<(int X, int Y)> GetAreaBounds(int x, int y)
+        {           
+            var coords = new HashSet<(int X, int Y)>();
+
+            if (field[x, y] != 0)
+                throw new Exception();
+
+            GetOpenedAreaRecursive(x, y, coords);
+
+            return coords.Where(coord => field[coord.X, coord.Y] != 0).ToHashSet();
+        }
+
+        private void GetOpenedAreaRecursive(int x, int y, HashSet<(int, int)> coords)
         {
             if (coords.Contains((x, y)))
                 return;

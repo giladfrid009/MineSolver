@@ -18,13 +18,13 @@ namespace MineSolver.Solvers
             {
                 for (int y = 0; y < height; y++)
                 {
-                    HashSet<(int X, int Y)> pending = new HashSet<(int X, int Y)> { (x, y) };
+                    var pending = new HashSet<(int, int)> { (x, y) };
 
                     while (pending.Count > 0)
                     {
-                        HashSet<(int, int)> pendingNew = new HashSet<(int, int)>();
+                        var pendingNew = new HashSet<(int, int)>();
 
-                        foreach ((int x2, int y2) in pending)
+                        foreach (var (x2, y2) in pending)
                         {
                             pendingNew.UnionWith(SolveCoord(x2, y2, log));
                         }
@@ -63,7 +63,14 @@ namespace MineSolver.Solvers
                 {
                     if (field[x2, y2] == 0)
                     {
-                        GetOpenedAreaRecursive(x2, y2, affected);
+                        var opened = GetAreaBounds(x2, y2);
+
+                        affected.UnionWith(opened);
+
+                        foreach(var (x3, y3) in opened)
+                        {
+                            affected.UnionWith(GetUnsolved(x3, y3));
+                        }
                     }
                     else
                     {

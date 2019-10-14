@@ -25,7 +25,8 @@ namespace MineSolver.Solvers
             return log;
         }
 
-        // todo: DOESNT SOLVE EVERYTHING ALWAYS.
+        //todo: DOESNT SOLVE EVERYTHING ALWAYS.
+        // somehow connected to recursion
         private void SolveCoord(int x, int y, SolveLog log)
         {
             if (fieldInfo[x, y].IsSolved || (fieldInfo[x, y].IsValue == false))
@@ -52,7 +53,14 @@ namespace MineSolver.Solvers
                 {
                     if (field[x2, y2] == 0)
                     {
-                        GetOpenedAreaRecursive(x2, y2, affected);
+                        var opened = GetAreaBounds(x2, y2);
+
+                        affected.UnionWith(opened);
+
+                        foreach (var (x3, y3) in opened)
+                        {
+                            affected.UnionWith(GetUnsolved(x3, y3));
+                        }
                     }
                     else
                     {
@@ -77,7 +85,7 @@ namespace MineSolver.Solvers
                 }
             }
 
-            foreach(var (x2, y2) in affected)
+            foreach (var (x2, y2) in affected)
             {
                 SolveCoord(x2, y2, log);
             }

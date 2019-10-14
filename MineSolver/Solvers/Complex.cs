@@ -12,6 +12,7 @@ namespace MineSolver.Solvers
         private readonly SolverBase<CoordInfo> solverSimple;
         private readonly ComboLib comboLibrary;
 
+        // todo: maybe make an interface for a secondary solver which depends on another solver?
         public Complex(MineFieldBase field, SolverBase<CoordInfo> solverSimple) : base(field)
         {
             this.solverSimple = solverSimple;

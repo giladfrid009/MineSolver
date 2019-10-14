@@ -23,7 +23,7 @@ namespace MineSolver.Solvers.Utils
                 for (int y = 0; y < Height; y++)
                 {
                     coordsInfo[x, y] = new TCoordInfo()
-                    {
+                    {                        
                         Field = field,
                         X = x,
                         Y = y
