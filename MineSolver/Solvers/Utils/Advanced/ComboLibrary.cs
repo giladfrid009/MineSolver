@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace MineSolver.Solvers.Utils.Advanced
+namespace Minesolver.Solvers.Utils.Advanced
 {
-    public class ComboLib
+    public class ComboLibrary
     {
         private Combo[][][] combos;
 
-        public ComboLib()
+        public ComboLibrary()
         {
             GenerateComboLibrary();
         }

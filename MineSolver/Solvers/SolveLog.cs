@@ -3,11 +3,11 @@ using System.Text;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace MineSolver.Solvers
+namespace Minesolver.Solvers
 {
     public enum Move { Flag, Reveal }
 
-    public class SolveLog
+    public class SolveLog : IClonable<SolveLog>
     {       
         public ReadOnlyCollection<((int X, int Y) Coord, Move Move)> MoveLog { get => moveLog.AsReadOnly(); }
 
@@ -28,6 +28,11 @@ namespace MineSolver.Solvers
             moveLog.AddRange(other.moveLog);
         }
 
+        public void Clear()
+        {
+            moveLog.Clear();
+        }
+
         public void Print()
         {
             Console.WriteLine(ToString());
@@ -43,6 +48,14 @@ namespace MineSolver.Solvers
             }
 
             return str.ToString();
+        }
+
+        public SolveLog Clone()
+        {
+            SolveLog clone = new SolveLog();
+            clone.Combine(this);
+
+            return clone;
         }
     }
 }

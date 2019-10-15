@@ -1,4 +1,4 @@
-﻿namespace MineSolver.Solvers.Utils.Advanced
+﻿namespace Minesolver.Solvers.Utils.Advanced
 {
     public class CoordDataAdvanced : CoordData
     {

@@ -2,9 +2,9 @@
 using System.Text;
 using System.Collections.Generic;
 
-namespace MineSolver
+namespace Minesolver
 {
-    public abstract class MineFieldBase 
+    public abstract class MineFieldBase : IClonable<MineFieldBase>
     {
         public event PrintMineFunc OnFlag;
         public event PrintMineFunc OnUnflag;
@@ -103,6 +103,6 @@ namespace MineSolver
             Console.Write(str);
         }
 
-        public abstract MineFieldBase Copy();
+        public abstract MineFieldBase Clone();
     }
 }

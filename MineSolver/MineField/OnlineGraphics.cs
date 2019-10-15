@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MineSolver
+namespace Minesolver
 {
     public static class OnlineGraphics
     {

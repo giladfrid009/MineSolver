@@ -1,25 +1,23 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using MineSolver.Solvers.Utils.Advanced;
-using MineSolver.Solvers.Utils;
+using Minesolver.Solvers.Utils.Advanced;
+using Minesolver.Solvers.Utils;
 
-namespace MineSolver.Solvers
+namespace Minesolver.Solvers
 {
     public class SolverAdvanced : SolverBase<CoordDataAdvanced>
     {
         private readonly SolverBase<CoordData> solverBasic;
-        private readonly ComboLib comboLibrary;
+        private readonly ComboLibrary comboLibrary;
 
-        // todo: maybe make an interface for a secondary solver which depends on another solver?
-        // i.e create interface solver initial, solver secondary and such
         public SolverAdvanced(MineFieldBase field, SolverBase<CoordData> solverBasic) : base(field)
         {
             this.solverBasic = solverBasic;
-            comboLibrary = new ComboLib();
+            comboLibrary = new ComboLibrary();
         }
 
-        private void Reset()
+        private void ResetFieldData()
         {
             for (int x = 0; x < width; x++)
             {
@@ -32,15 +30,15 @@ namespace MineSolver.Solvers
 
         public override SolveLog Solve()
         {
-            Reset();
+            log.Clear();
 
-            SolveLog log = new SolveLog();
+            ResetFieldData();
 
             bool progress;
 
             while(true)
             {
-                var oldField = field.Copy();
+                var oldField = field.Clone();
 
                 progress = false;
 
@@ -50,7 +48,7 @@ namespace MineSolver.Solvers
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (SolveCoord(x, y, log))
+                        if (SolveCoord(x, y))
                         {
                             progress = true;
                             x = width;
@@ -62,13 +60,13 @@ namespace MineSolver.Solvers
                 if (progress == false)
                     break;
 
-                UpdateFieldInfo(oldField);
+                UpdateFieldData(oldField);
             }
 
             return log;
         }
 
-        private bool SolveCoord(int x, int y, SolveLog log)
+        private bool SolveCoord(int x, int y)
         {
             if (fieldData[x, y].TryAdvanced == false)
             {
@@ -86,7 +84,7 @@ namespace MineSolver.Solvers
             var common = GetCommonCombo(combos);
             var hidden = GetHidden(x, y);
 
-            return ApplyCommonCombo(hidden, common, log);
+            return ApplyCommonCombo(hidden, common);
         }
 
         private List<Combo> GetValidCombos(int x, int y)
@@ -139,7 +137,7 @@ namespace MineSolver.Solvers
             return valid;
         }
 
-        private bool ApplyCommonCombo(List<(int X, int Y)> coords, bool?[] common, SolveLog log)
+        private bool ApplyCommonCombo(List<(int X, int Y)> coords, bool?[] common)
         {
             if (coords.Count != common.Length)
             {
@@ -270,7 +268,7 @@ namespace MineSolver.Solvers
             return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
         }
 
-        private void UpdateFieldInfo(MineFieldBase oldField)
+        private void UpdateFieldData(MineFieldBase oldField)
         {
             for (int x = 0; x < width; x++)
             {
@@ -280,13 +278,13 @@ namespace MineSolver.Solvers
                     {
                         if (fieldData[x, y].IsValue)
                         {
-                            EnableTryComplex(x, y);
+                            UpdateCoordData(x, y);
                         }
                         else
                         {
                             foreach (var (x2, y2) in GetUnsolved(x, y))
                             {
-                                EnableTryComplex(x2, y2);
+                                UpdateCoordData(x2, y2);
                             }
                         }
                     }
@@ -295,7 +293,7 @@ namespace MineSolver.Solvers
 
         }
 
-        private void EnableTryComplex(int x, int y)
+        private void UpdateCoordData(int x, int y)
         {
             if (fieldData[x, y].TryAdvanced)
                 return;
@@ -304,7 +302,7 @@ namespace MineSolver.Solvers
 
             foreach (var (x2, y2) in GetUnsolved(x, y))
             {
-                EnableTryComplex(x2, y2);
+                UpdateCoordData(x2, y2);
             }
         }
     }

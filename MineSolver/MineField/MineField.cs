@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MineSolver
+namespace Minesolver
 {
     public class MineField : MineFieldBase
     {
@@ -36,6 +36,7 @@ namespace MineSolver
             }
             else if (coordVal == Mine)
             {
+                //Print();
                 // todo: remove eventially
                 throw new Exception("You lost.");
             }
@@ -155,7 +156,7 @@ namespace MineSolver
             }
         }
 
-        public override MineFieldBase Copy()
+        public override MineFieldBase Clone()
         {
             MineField copy = new MineField(Width, Height);
 

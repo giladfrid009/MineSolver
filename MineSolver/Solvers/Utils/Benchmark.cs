@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace MineSolver.Solvers.Utils
+namespace Minesolver.Solvers.Utils
 {
     public static class Benchmarks
     {
