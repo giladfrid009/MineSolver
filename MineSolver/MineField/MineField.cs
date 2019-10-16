@@ -36,7 +36,6 @@ namespace Minesolver
             }
             else if (coordVal == Mine)
             {
-                //Print();
                 // todo: remove eventially
                 throw new Exception("You lost.");
             }

@@ -12,7 +12,7 @@ namespace Minesolver.Solvers
 
         public override SolveLog Solve()
         {
-            log.Clear();
+            Reset();
 
             for (int x = 0; x < width; x++)
             {
@@ -47,11 +47,11 @@ namespace Minesolver.Solvers
             int nHidden = fieldData[x, y].NumHidden;
             int nMines = fieldData[x, y].NumMines;
 
-            if (field[x, y] == nMines)
+            if (Field[x, y] == nMines)
             {
                 return RevealHidden(x, y);
             }
-            else if (nHidden == field[x, y] - nMines)
+            else if (nHidden == Field[x, y] - nMines)
             {
                 return FlagHidden(x, y);               
             }

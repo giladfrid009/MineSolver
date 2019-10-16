@@ -7,8 +7,9 @@ namespace Minesolver.Solvers
 {
     public abstract class SolverBase<TCoordData> where TCoordData : CoordData, new()
     {
+        public MineFieldBase Field { get; }
+
         protected readonly FieldData<TCoordData> fieldData;
-        protected readonly MineFieldBase field;
         protected readonly SolveLog log;
         protected readonly int width;
         protected readonly int height;
@@ -16,7 +17,7 @@ namespace Minesolver.Solvers
         public SolverBase(MineFieldBase field)
         {
             fieldData = new FieldData<TCoordData>(field);
-            this.field = field;
+            Field = field;
             log = new SolveLog();
             width = field.Width;
             height = field.Height;
@@ -32,13 +33,13 @@ namespace Minesolver.Solvers
 
             foreach (var (x2, y2) in hidden)
             {
-                field.Reveal(x2, y2);
+                Field.Reveal(x2, y2);
                 log.AddMove(x2, y2, Move.Reveal);
             }
 
             foreach (var (x2, y2) in hidden)
             {
-                if (field[x2, y2] == 0)
+                if (Field[x2, y2] == 0)
                 {
                     var opened = GetAreaBounds(x2, y2);
 
@@ -67,7 +68,7 @@ namespace Minesolver.Solvers
 
             foreach (var (x2, y2) in hidden)
             {
-                field.Flag(x2, y2);
+                Field.Flag(x2, y2);
                 log.AddMove(x2, y2, Move.Flag);
             }
 
@@ -98,12 +99,12 @@ namespace Minesolver.Solvers
         {           
             var coords = new HashSet<(int X, int Y)>();
 
-            if (field[x, y] != 0)
+            if (Field[x, y] != 0)
                 throw new Exception();
 
             GetOpenedAreaRecursive(x, y, coords);
 
-            return coords.Where(coord => field[coord.X, coord.Y] != 0).ToList();
+            return coords.Where(coord => Field[coord] != 0).ToList();
         }
 
         private void GetOpenedAreaRecursive(int x, int y, HashSet<(int, int)> coords)
@@ -113,11 +114,24 @@ namespace Minesolver.Solvers
 
             coords.Add((x, y));
 
-            if (field[x, y] == 0)
+            if (Field[x, y] == 0)
             {
-                foreach(var (x2, y2) in fieldData[x,y].Neighbors)
+                foreach (var (x2, y2) in fieldData[x, y].Neighbors)
                 {
                     GetOpenedAreaRecursive(x2, y2, coords);
+                }
+            }
+        }
+
+        protected virtual void Reset()
+        {
+            log.Clear();
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    fieldData[x, y].IsSolved = false;
                 }
             }
         }

@@ -1,6 +1,4 @@
-﻿using System;
-using Minesolver.Solvers;
-using Minesolver.Solvers.Utils;
+﻿using Minesolver.Solvers;
 
 namespace Minesolver
 {
@@ -8,32 +6,14 @@ namespace Minesolver
     {
         static void Main()
         {
-            MineField field = new MineField(250, 65);
-            field.Generate(0.2, 3, 3, 2);
-            field.Reveal(3, 3);
+            MineField field1 = new MineField(250, 65, 1);
+            SolverBasic solverSimple1 = new SolverBasic(field1);
+            SolverAdvanced solverAdvanced1 = new SolverAdvanced(field1, solverSimple1);
+         
+            OnlineGraphics.Subscibe(field1);
 
-            OnlineGraphics.Subscibe(field);
-
-            SolverBasic solverSimple = new SolverBasic(field);
-            SolverAdvanced solverComplex1 = new SolverAdvanced(field, solverSimple);
-            SolverAdvancedPrecent solverPrecent = new SolverAdvancedPrecent(field, solverComplex1);
-
-            solverPrecent.Solve();
-
-            //SolverBasicRecursive solverSimpleRecursive = new SolverBasicRecursive(field);
-            //SolverAdvanced solverComplex2 = new SolverAdvanced(field, solverSimpleRecursive);
-
-            field.Generate(0.2, 3, 3, 2);
-            field.Reveal(3, 3);
-
-            //solverComplex1.Solve();
-
-            //Console.WriteLine(Benchmarks.TestSpeed(field, solverSimple, 1000));
-            //Console.WriteLine(Benchmarks.TestSpeed(field, solverComplex1, 1000));
-            //Console.WriteLine(Benchmarks.TestSpeed(field, solverSimpleRecursive, 1000));
-            //Console.WriteLine(Benchmarks.TestSpeed(field, solverComplex2, 1000));
-
-            Console.ReadKey();
+            solverAdvanced1.Solve();
+           
         }
 
     }

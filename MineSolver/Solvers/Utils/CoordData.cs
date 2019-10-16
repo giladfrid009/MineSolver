@@ -11,13 +11,13 @@ namespace Minesolver.Solvers.Utils
         public bool IsRevealed { get => Value != MineFieldBase.Hidden ? true : false; }
         public bool IsMine { get => Value == MineFieldBase.Mine ? true : false; }
         public bool IsValue { get => IsRevealed && !IsMine; }
-        public bool IsSolved { get => GetIsSolved(); }
+        public bool IsSolved { get => GetIsSolved(); set => isSolvedCache = value; }
         public int Value { get => Field[X, Y]; }
         public int NumMines { get => GetNumMines(); }
         public int NumHidden { get => GetNumHidden(); }
         public List<(int X, int Y)> Neighbors { get; private set; }
 
-        private bool isSolvedCache;      
+        private bool isSolvedCache;
 
         public virtual void Initialize(int x, int y, MineFieldBase field)
         {

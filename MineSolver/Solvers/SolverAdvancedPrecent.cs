@@ -27,7 +27,7 @@ namespace Minesolver.Solvers
 
         public override SolveLog Solve()
         {
-            log.Clear();
+            Reset();
 
             while (fieldData.IsSolved == false)
             {
@@ -89,18 +89,18 @@ namespace Minesolver.Solvers
                 {
                     Console.WriteLine(string.Format("FLAGGED MAX: ({0}, {1}) : {2}%", maxCoord.X, maxCoord.Y, maxPrecent * 100));
 
-                    field.Flag(maxCoord.X, maxCoord.Y);
+                    Field.Flag(maxCoord.X, maxCoord.Y);
 
                 }
                 else
                 {
                     Console.WriteLine(string.Format("REVEALED MIN: ({0}, {1}) : {2}%", minCoord.X, minCoord.Y, minPrecent * 100));
 
-                    field.Reveal(minCoord.X, minCoord.Y);
+                    Field.Reveal(minCoord.X, minCoord.Y);
                 }
 
 
-                ResetFieldData();                
+                ResetPrecentage();                
             }
 
             return log;
@@ -108,9 +108,9 @@ namespace Minesolver.Solvers
 
         private bool TryCombosRecursive(int x, int y)
         {
-            bool foundValid = false;
+            bool result = false;
 
-            int nFlagsToComplete = field[x, y] - fieldData[x, y].NumMines;
+            int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
 
             var hidden = GetHiddenUnused(x, y);
 
@@ -121,56 +121,37 @@ namespace Minesolver.Solvers
 
             var combos = comboLibrary[hidden.Count, nFlagsToComplete];
 
-            var unsolved = GetUnsolved(x, y);
-
             foreach (var combo in combos)
             {
-                var effected = new HashSet<(int, int)>(unsolved);
+                var effected = new HashSet<(int X, int Y)>();
 
-                var mines = ApplyCombo(combo, hidden);
+                combo.Apply(Field, fieldData, hidden);
 
-                foreach (var (x2, y2) in mines)
+                foreach (var (x2, y2) in hidden)
                 {
                     effected.UnionWith(GetValues(x2, y2));
                 }
 
-                bool currentValid = true;
-
-                foreach (var (x2, y2) in effected)
+                if (effected.All(coord => IsCoordValid(coord.X, coord.Y)))
                 {
-                    if (IsCoordValid(x2, y2) == false)
-                    {
-                        currentValid = false;
-                        break;
-                    }
-                }
-
-                RemoveCombo(combo, hidden);
-
-                if (currentValid)
-                {
-                    foundValid = true;
+                    result = true;
                     UpdateFieldData(combo, hidden);
                 }
+
+                combo.Remove(Field, fieldData, hidden);
             }
 
-            return foundValid;
+            return result;
         }
 
         private bool IsCoordValid(int x, int y)
         {
-            if (fieldData[x, y].IsValue == false)
-                return false;
-
             int nMines = fieldData[x, y].NumMines;
 
-            if (nMines > field[x, y])
+            if (nMines > Field[x, y])
                 return false;
 
-            if (fieldData[x, y].IsSolved)
-                return true;
-
-            if (nMines < field[x, y] && TryCombosRecursive(x, y) == false)
+            if (nMines < Field[x, y] && TryCombosRecursive(x, y) == false)
                 return false;
 
             return true;
@@ -179,53 +160,6 @@ namespace Minesolver.Solvers
         private List<(int X, int Y)> GetHiddenUnused(int x, int y)
         {
             return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
-        }
-
-        private List<(int X, int Y)> ApplyCombo(Combo combo, List<(int X, int Y)> coords)
-        {
-            List<(int, int)> miness = new List<(int, int)>();
-
-            if (coords.Count != combo.Length)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            for (int i = 0; i < combo.Length; i++)
-            {
-                int x = coords[i].X;
-                int y = coords[i].Y;
-
-                fieldData[x, y].UsedInCombo = true;
-
-                if (combo[i])
-                {
-                    field.Flag(x, y);
-                    miness.Add(coords[i]);
-                }
-            }
-
-            return miness;
-        }
-
-        private void RemoveCombo(Combo combo, List<(int X, int Y)> coords)
-        {
-            if (coords.Count != combo.Length)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            for (int i = 0; i < combo.Length; i++)
-            {
-                int x = coords[i].X;
-                int y = coords[i].Y;
-
-                fieldData[x, y].UsedInCombo = false;
-
-                if (combo[i])
-                {
-                    field.Unflag(x, y);
-                }
-            }
         }
 
         private void UpdateFieldData(Combo combo, List<(int X, int Y)> coords)
@@ -247,13 +181,30 @@ namespace Minesolver.Solvers
             }
         }
 
-        private void ResetFieldData()
+        protected override void Reset()
+        {
+            log.Clear();
+
+            ResetPrecentage();
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    fieldData[x, y].IsSolved = false;
+                    fieldData[x, y].TryAdvanced = true;
+                    fieldData[x, y].TotalNumFlagged = 0;
+                    fieldData[x, y].PrecentMine = 0;
+                }
+            }
+        }
+
+        private void ResetPrecentage()
         {
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    fieldData[x, y].TryAdvanced = true;
                     fieldData[x, y].TotalNumFlagged = 0;
                     fieldData[x, y].PrecentMine = 0;
                 }
