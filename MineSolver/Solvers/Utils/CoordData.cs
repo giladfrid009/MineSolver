@@ -8,13 +8,13 @@ namespace Minesolver.Solvers.Utils
         public int X { get; private set; }
         public int Y { get; private set; }
         public bool IsInitialized { get; private set; } = false;
-        public bool IsRevealed { get => Value != MineFieldBase.Hidden ? true : false; }
-        public bool IsMine { get => Value == MineFieldBase.Mine ? true : false; }
-        public bool IsValue { get => IsRevealed && !IsMine; }
+        public bool IsRevealed => Value != MineFieldBase.Hidden ? true : false;
+        public bool IsMine => Value == MineFieldBase.Mine ? true : false;
+        public bool IsValue => IsRevealed && !IsMine;
         public bool IsSolved { get => GetIsSolved(); set => isSolvedCache = value; }
-        public int Value { get => Field[X, Y]; }
-        public int NumMines { get => GetNumMines(); }
-        public int NumHidden { get => GetNumHidden(); }
+        public int Value => Field[X, Y];
+        public int NumMines => GetNumMines();
+        public int NumHidden => GetNumHidden();
         public List<(int X, int Y)> Neighbors { get; private set; }
 
         private bool isSolvedCache;
@@ -32,12 +32,16 @@ namespace Minesolver.Solvers.Utils
         private bool GetIsSolved()
         {
             if (isSolvedCache == true)
+            {
                 return true;
+            }
 
-            foreach (var coord in Neighbors)
+            foreach ((int X, int Y) coord in Neighbors)
             {
                 if (Field[coord] == MineFieldBase.Hidden)
+                {
                     return false;
+                }
             }
 
             isSolvedCache = true;
@@ -49,10 +53,12 @@ namespace Minesolver.Solvers.Utils
         {
             int nMines = 0;
 
-            foreach (var coord in Neighbors)
+            foreach ((int X, int Y) coord in Neighbors)
             {
                 if (Field[coord] == MineFieldBase.Mine)
+                {
                     nMines++;
+                }
             }
 
             return nMines;
@@ -62,10 +68,12 @@ namespace Minesolver.Solvers.Utils
         {
             int nHidden = 0;
 
-            foreach (var coord in Neighbors)
+            foreach ((int X, int Y) coord in Neighbors)
             {
                 if (Field[coord] == MineFieldBase.Hidden)
+                {
                     nHidden++;
+                }
             }
 
             return nHidden;

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace Minesolver.Solvers.Utils.Advanced
@@ -28,10 +27,7 @@ namespace Minesolver.Solvers.Utils.Advanced
             }
         }
 
-        public bool this[int index]
-        {
-            get => comboVals[index];
-        }
+        public bool this[int index] => comboVals[index];
 
         public void Apply<TCoordData>(MineFieldBase field, FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced, new()
         {
@@ -42,7 +38,7 @@ namespace Minesolver.Solvers.Utils.Advanced
 
             for (int i = 0; i < Length; i++)
             {
-                var (x, y) = coords[i];
+                (int x, int y) = coords[i];
 
                 fieldData[x, y].UsedInCombo = true;
 
@@ -62,7 +58,7 @@ namespace Minesolver.Solvers.Utils.Advanced
 
             for (int i = 0; i < Length; i++)
             {
-                var (x, y) = coords[i];
+                (int x, int y) = coords[i];
 
                 fieldData[x, y].UsedInCombo = false;
 

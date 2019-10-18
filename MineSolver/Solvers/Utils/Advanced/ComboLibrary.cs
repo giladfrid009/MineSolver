@@ -12,10 +12,7 @@ namespace Minesolver.Solvers.Utils.Advanced
             GenerateComboLibrary();
         }
 
-        public Combo[] this[int nHidden, int nMines]
-        {
-            get => combos[nHidden][nMines];
-        }
+        public Combo[] this[int nHidden, int nMines] => combos[nHidden][nMines];
 
         private void GenerateComboLibrary()
         {
@@ -25,7 +22,7 @@ namespace Minesolver.Solvers.Utils.Advanced
             {
                 combos[nHidden] = new Combo[nHidden + 1][];
 
-                var combosOfLength = GenerateCombosOfLength(nHidden, 0, new bool[nHidden]);
+                IEnumerable<Combo> combosOfLength = GenerateCombosOfLength(nHidden, 0, new bool[nHidden]);
 
                 for (int nMines = 0; nMines <= nHidden; nMines++)
                 {
@@ -44,14 +41,14 @@ namespace Minesolver.Solvers.Utils.Advanced
             {
                 combo[index] = false;
 
-                foreach (var comboFull in GenerateCombosOfLength(length, index + 1, combo))
+                foreach (Combo comboFull in GenerateCombosOfLength(length, index + 1, combo))
                 {
                     yield return comboFull;
                 }
 
                 combo[index] = true;
 
-                foreach (var comboFull in GenerateCombosOfLength(length, index + 1, combo))
+                foreach (Combo comboFull in GenerateCombosOfLength(length, index + 1, combo))
                 {
                     yield return comboFull;
                 }

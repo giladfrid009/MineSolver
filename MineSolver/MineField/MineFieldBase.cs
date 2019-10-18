@@ -1,18 +1,18 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Minesolver
 {
     public abstract class MineFieldBase : IClonable<MineFieldBase>
     {
-        public event Action OnLose;
-        public event FlagFunc OnFlag;
-        public event FlagFunc OnUnflag;
-        public event ValueFunc OnReveal;
+        public event CoordFunc OnLoss;
+        public event CoordFunc OnFlag;
+        public event CoordFunc OnUnflag;
+        public event CoordValueFunc OnReveal;
 
-        public delegate void FlagFunc(int x, int y);
-        public delegate void ValueFunc(int x, int y, int val);
+        public delegate void CoordFunc(int x, int y);
+        public delegate void CoordValueFunc(int x, int y, int val);
 
         public int Width { get; }
         public int Height { get; }
@@ -20,7 +20,7 @@ namespace Minesolver
         public const int Mine = -1;
         public const int Hidden = -2;
 
-        protected MineFieldBase (int width, int height)
+        protected MineFieldBase(int width, int height)
         {
             Width = width;
             Height = height;
@@ -29,7 +29,7 @@ namespace Minesolver
 
         public abstract int this[int x, int y] { get; }
 
-        public int this[(int x, int y) coord] { get => this[coord.x, coord.y]; }
+        public int this[(int x, int y) coord] => this[coord.x, coord.y];
 
         public abstract void Flag(int x, int y);
 
@@ -52,9 +52,9 @@ namespace Minesolver
             OnReveal?.Invoke(x, y, val);
         }
 
-        protected void RaiseOnLose()
+        protected void RaiseOnLose(int x, int y)
         {
-            OnLose?.Invoke();
+            OnLoss?.Invoke(x, y);
         }
 
         public List<(int X, int Y)> GetNeighbors(int x, int y)
@@ -71,7 +71,9 @@ namespace Minesolver
                 for (int yNeighbor = yLow; yNeighbor <= yHigh; yNeighbor++)
                 {
                     if (xNeighbor == x && yNeighbor == y)
+                    {
                         continue;
+                    }
 
                     neighbors.Add((xNeighbor, yNeighbor));
                 }
@@ -88,7 +90,7 @@ namespace Minesolver
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    var val = this[x, y];
+                    int val = this[x, y];
 
                     if (val == Hidden)
                     {
@@ -101,7 +103,7 @@ namespace Minesolver
                     else
                     {
                         str.Append(val);
-                    }                   
+                    }
                 }
                 str.Append("\n");
             }

@@ -7,9 +7,9 @@ namespace Minesolver.Solvers.Utils
     {
         public static TimeSpan MeasureTime<TCoordData>(SolverBase<TCoordData> solver, int iterations, int seed) where TCoordData : CoordData, new()
         {
-            var rnd = new Random(seed);
-            var stopwatch = new Stopwatch();
-            var field = (MineField)solver.Field;
+            Random rnd = new Random(seed);
+            Stopwatch stopwatch = new Stopwatch();
+            MineField field = (MineField)solver.Field;
 
             for (int i = 0; i < iterations; i++)
             {
@@ -27,8 +27,8 @@ namespace Minesolver.Solvers.Utils
         public static int CountUnsolved<TCoordData>(SolverBase<TCoordData> solver, int iterations, int seed)
             where TCoordData : CoordData, new()
         {
-            var rnd = new Random(seed);
-            var field = (MineField)solver.Field;
+            Random rnd = new Random(seed);
+            MineField field = (MineField)solver.Field;
 
             int width = field.Width;
             int height = field.Height;

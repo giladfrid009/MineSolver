@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Minesolver.Solvers.Utils;
+﻿using Minesolver.Solvers.Utils;
+using System.Collections.Generic;
 
 namespace Minesolver.Solvers
 {
@@ -27,12 +27,12 @@ namespace Minesolver.Solvers
 
         private void SolveCoord(int x, int y)
         {
-            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
+            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false) || HasLost)
             {
                 return;
             }
 
-            var affected = new List<(int, int)>();
+            List<(int, int)> affected = new List<(int, int)>();
 
             int nHidden = fieldData[x, y].NumHidden;
             int nMines = fieldData[x, y].NumMines;
@@ -46,7 +46,7 @@ namespace Minesolver.Solvers
                 affected.AddRange(FlagHidden(x, y));
             }
 
-            foreach (var (x2, y2) in affected)
+            foreach ((int x2, int y2) in affected)
             {
                 SolveCoord(x2, y2);
             }

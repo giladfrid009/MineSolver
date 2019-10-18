@@ -16,17 +16,16 @@ namespace Minesolver
             fieldUnsolved = new int[Width, Height];
         }
 
-        public override int this[int x, int y]
-        {
-            get => fieldUnsolved[x, y];
-        }
+        public override int this[int x, int y] => fieldUnsolved[x, y];
 
         public override int Reveal(int x, int y)
         {
             if (fieldUnsolved[x, y] != Hidden)
+            {
                 return fieldUnsolved[x, y];
+            }
 
-            var coordVal = fieldSolved[x, y];
+            int coordVal = fieldSolved[x, y];
 
             if (coordVal == Hidden)
             {
@@ -34,15 +33,15 @@ namespace Minesolver
             }
             else if (coordVal == Mine)
             {
-                RaiseOnLose();
-                throw new Exception();
+                RaiseOnLose(x, y);
+                return Mine;
             }
 
             fieldUnsolved[x, y] = coordVal;
 
             if (coordVal == 0)
             {
-                foreach (var (x2, y2) in GetNeighbors(x, y))
+                foreach ((int x2, int y2) in GetNeighbors(x, y))
                 {
                     Reveal(x2, y2);
                 }
@@ -95,11 +94,13 @@ namespace Minesolver
         private void GenerateOrigin(int xOrigin, int yOrigin, int size)
         {
             if (size <= 0 || fieldSolved[xOrigin, yOrigin] == 0)
+            {
                 return;
+            }
 
             fieldSolved[xOrigin, yOrigin] = 0;
 
-            foreach (var (x2, y2) in GetNeighbors(xOrigin, yOrigin))
+            foreach ((int x2, int y2) in GetNeighbors(xOrigin, yOrigin))
             {
                 GenerateOrigin(x2, y2, size - 1);
             }
@@ -114,18 +115,22 @@ namespace Minesolver
                 for (int y = 0; y < Height; y++)
                 {
                     if (fieldSolved[x, y] == Hidden)
+                    {
                         freeCoords.Add((x, y));
+                    }
                 }
             }
 
             for (int i = 0; i < nMines; i++)
             {
                 if (freeCoords.Count == 0)
+                {
                     return;
+                }
 
                 int index = rnd.Next(0, freeCoords.Count);
 
-                var (x, y) = freeCoords[index];
+                (int x, int y) = freeCoords[index];
 
                 fieldSolved[x, y] = Mine;
 
@@ -140,11 +145,13 @@ namespace Minesolver
                 for (int y = 0; y < Height; y++)
                 {
                     if (fieldSolved[x, y] == Mine)
+                    {
                         continue;
+                    }
 
                     fieldSolved[x, y] = 0;
 
-                    foreach (var (x2, y2) in GetNeighbors(x, y))
+                    foreach ((int x2, int y2) in GetNeighbors(x, y))
                     {
                         if (fieldSolved[x2, y2] == Mine)
                         {

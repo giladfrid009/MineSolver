@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Minesolver.Solvers.Utils;
+﻿using Minesolver.Solvers.Utils;
+using System.Collections.Generic;
 
 namespace Minesolver.Solvers
 {
@@ -18,15 +18,15 @@ namespace Minesolver.Solvers
             {
                 for (int y = 0; y < height; y++)
                 {
-                    var pending = new List<(int, int)> { (x, y) };
+                    HashSet<(int, int)> pending = new HashSet<(int, int)> { (x, y) };
 
                     while (pending.Count > 0)
                     {
-                        var pendingNew = new List<(int, int)>();
+                        HashSet<(int, int)> pendingNew = new HashSet<(int, int)>();
 
-                        foreach (var (x2, y2) in pending)
+                        foreach ((int x2, int y2) in pending)
                         {
-                            pendingNew.AddRange(SolveCoord(x2, y2));
+                            pendingNew.UnionWith(SolveCoord(x2, y2));
                         }
 
                         pending = pendingNew;
@@ -37,11 +37,11 @@ namespace Minesolver.Solvers
             return log.Clone();
         }
 
-        private List<(int X, int Y)> SolveCoord(int x, int y)
+        private HashSet<(int X, int Y)> SolveCoord(int x, int y)
         {
-            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
+            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false) || HasLost)
             {
-                return new List<(int, int)>();
+                return new HashSet<(int, int)>();
             }
 
             int nHidden = fieldData[x, y].NumHidden;
@@ -53,10 +53,10 @@ namespace Minesolver.Solvers
             }
             else if (nHidden == Field[x, y] - nMines)
             {
-                return FlagHidden(x, y);               
+                return FlagHidden(x, y);
             }
 
-            return new List<(int, int)>();
+            return new HashSet<(int, int)>();
         }
     }
 }

@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
 
 namespace Minesolver.Solvers
 {
     public enum Move { Flag, Reveal }
 
     public class SolveLog : IClonable<SolveLog>
-    {       
-        public ReadOnlyCollection<((int X, int Y) Coord, Move Move)> MoveLog { get => moveLog.AsReadOnly(); }
+    {
+        public ReadOnlyCollection<((int X, int Y) Coord, Move Move)> MoveLog => moveLog.AsReadOnly();
 
         private readonly List<((int X, int Y) Coord, Move Move)> moveLog;
 

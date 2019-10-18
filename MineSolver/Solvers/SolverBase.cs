@@ -1,13 +1,14 @@
-﻿using System;
-using System.Linq;
+﻿using Minesolver.Solvers.Utils;
+using System;
 using System.Collections.Generic;
-using Minesolver.Solvers.Utils;
+using System.Linq;
 
 namespace Minesolver.Solvers
 {
     public abstract class SolverBase<TCoordData> where TCoordData : CoordData, new()
     {
         public MineFieldBase Field { get; }
+        public bool HasLost { get; private set; } = false;
 
         protected readonly FieldData<TCoordData> fieldData;
         protected readonly SolveLog log;
@@ -21,60 +22,62 @@ namespace Minesolver.Solvers
             log = new SolveLog();
             width = field.Width;
             height = field.Height;
+
+            field.OnLoss += (x, y) => HasLost = true;
         }
 
         public abstract SolveLog Solve();
 
-        protected List<(int X, int Y)> RevealHidden(int x, int y)
+        protected HashSet<(int X, int Y)> RevealHidden(int x, int y)
         {
-            var affected = new List<(int, int)>();
+            HashSet<(int, int)> affected = new HashSet<(int, int)>();
 
-            var hidden = GetHidden(x, y);
+            List<(int X, int Y)> hidden = GetHidden(x, y);
 
-            foreach (var (x2, y2) in hidden)
+            foreach ((int x2, int y2) in hidden)
             {
                 Field.Reveal(x2, y2);
                 log.AddMove(x2, y2, Move.Reveal);
             }
 
-            foreach (var (x2, y2) in hidden)
+            foreach ((int x2, int y2) in hidden)
             {
                 if (Field[x2, y2] == 0)
                 {
-                    var opened = GetAreaBounds(x2, y2);
+                    List<(int X, int Y)> opened = GetAreaBounds(x2, y2);
 
-                    affected.AddRange(opened);
+                    affected.UnionWith(opened);
 
-                    foreach (var (x3, y3) in opened)
+                    foreach ((int x3, int y3) in opened)
                     {
-                        affected.AddRange(GetUnsolved(x3, y3));
+                        affected.UnionWith(GetUnsolved(x3, y3));
                     }
                 }
                 else
                 {
                     affected.Add((x2, y2));
-                    affected.AddRange(GetUnsolved(x2, y2));
+                    affected.UnionWith(GetUnsolved(x2, y2));
                 }
             }
 
             return affected;
         }
 
-        protected List<(int X, int Y)> FlagHidden(int x, int y)
+        protected HashSet<(int X, int Y)> FlagHidden(int x, int y)
         {
-            var affected = new List<(int, int)>();
+            HashSet<(int, int)> affected = new HashSet<(int, int)>();
 
-            var hidden = GetHidden(x, y);
+            List<(int X, int Y)> hidden = GetHidden(x, y);
 
-            foreach (var (x2, y2) in hidden)
+            foreach ((int x2, int y2) in hidden)
             {
                 Field.Flag(x2, y2);
                 log.AddMove(x2, y2, Move.Flag);
             }
 
-            foreach (var (x2, y2) in hidden)
+            foreach ((int x2, int y2) in hidden)
             {
-                affected.AddRange(GetUnsolved(x2, y2));
+                affected.UnionWith(GetUnsolved(x2, y2));
             }
 
             return affected;
@@ -96,11 +99,13 @@ namespace Minesolver.Solvers
         }
 
         protected List<(int X, int Y)> GetAreaBounds(int x, int y)
-        {           
-            var coords = new HashSet<(int X, int Y)>();
+        {
+            HashSet<(int X, int Y)> coords = new HashSet<(int X, int Y)>();
 
             if (Field[x, y] != 0)
+            {
                 throw new Exception();
+            }
 
             GetOpenedAreaRecursive(x, y, coords);
 
@@ -110,13 +115,15 @@ namespace Minesolver.Solvers
         private void GetOpenedAreaRecursive(int x, int y, HashSet<(int, int)> coords)
         {
             if (coords.Contains((x, y)))
+            {
                 return;
+            }
 
             coords.Add((x, y));
 
             if (Field[x, y] == 0)
             {
-                foreach (var (x2, y2) in fieldData[x, y].Neighbors)
+                foreach ((int x2, int y2) in fieldData[x, y].Neighbors)
                 {
                     GetOpenedAreaRecursive(x2, y2, coords);
                 }
@@ -126,6 +133,8 @@ namespace Minesolver.Solvers
         protected virtual void Reset()
         {
             log.Clear();
+
+            HasLost = false;
 
             for (int x = 0; x < width; x++)
             {

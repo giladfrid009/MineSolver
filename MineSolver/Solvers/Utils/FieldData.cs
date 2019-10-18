@@ -2,9 +2,9 @@
 {
     public class FieldData<TCoordInfo> where TCoordInfo : CoordData, new()
     {
-        public int Width { get => field.Width; }
-        public int Height { get => field.Height; }
-        public bool IsSolved { get => IsSolvedFunc(); }
+        public int Width => field.Width;
+        public int Height => field.Height;
+        public bool IsSolved => IsSolvedFunc();
 
         private readonly MineFieldBase field;
 
@@ -23,17 +23,11 @@
                     coordsData[x, y].Initialize(x, y, field);
                 }
             }
-        }        
-
-        public TCoordInfo this[int x, int y]
-        {
-            get => coordsData[x, y];
         }
 
-        public TCoordInfo this[(int x, int y) coord]
-        {
-            get => coordsData[coord.x, coord.y];
-        }
+        public TCoordInfo this[int x, int y] => coordsData[x, y];
+
+        public TCoordInfo this[(int x, int y) coord] => coordsData[coord.x, coord.y];
 
         private bool IsSolvedFunc()
         {
@@ -42,7 +36,9 @@
                 for (int y = 0; y < Height; y++)
                 {
                     if (coordsData[x, y].IsSolved == false)
+                    {
                         return false;
+                    }
                 }
             }
 
