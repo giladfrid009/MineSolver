@@ -1,34 +1,18 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Collections.Generic;
 using Minesolver.Solvers.Utils.Advanced;
-using Minesolver.Solvers.Utils;
 
 namespace Minesolver.Solvers
 {
-    public class SolverAdvanced : SolverBase<CoordDataAdvanced>
+    class SolverAdvanced : SolverBase<CoordDataAdvanced>
     {
-        private readonly SolverBase<CoordData> solverBasic;
+        private readonly SolverBasic solverBasic;
         private readonly ComboLibrary comboLibrary;
 
-        public SolverAdvanced(MineFieldBase field, SolverBase<CoordData> solverBasic) : base(field)
+        public SolverAdvanced(MineFieldBase field) : base(field)
         {
-            this.solverBasic = solverBasic;
+            solverBasic = new SolverBasic(field);
             comboLibrary = new ComboLibrary();
-        }
-
-        protected override void Reset()
-        {
-            log.Clear();
-
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    fieldData[x, y].IsSolved = false;
-                    fieldData[x, y].TryAdvanced = true;
-                }
-            }
         }
 
         public override SolveLog Solve()
@@ -37,7 +21,7 @@ namespace Minesolver.Solvers
 
             bool progress;
 
-            while(true)
+            while (true)
             {
                 var oldField = Field.Clone();
 
@@ -61,43 +45,99 @@ namespace Minesolver.Solvers
                 if (progress == false)
                     break;
 
-                UpdateFieldData(oldField);
+                UpdateFieldChanges(oldField);
             }
 
-            return log;
+            // then make a guess 
+
+            return log.Clone();
         }
 
         private bool SolveCoord(int x, int y)
         {
+            bool result = false;
+
             if (fieldData[x, y].TryAdvanced == false)
             {
-                return false;
+                return result;
             }
 
             fieldData[x, y].TryAdvanced = false;
 
             if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
             {
-                return false;
+                return result;
             }
 
-            var combos = GetValidCombos(x, y);
-
-            var (common, result) = Combo.GetCommonState(combos);
-
-            if (result == false)
-                return false;
+            CalcTotals(x, y);
 
             var hidden = GetHidden(x, y);
 
-            ApplyCommonState(common, hidden);
+            foreach (var (x2, y2) in hidden)
+            {
+                if (fieldData[x2, y2].TotalFlagged == 0)
+                {
+                    Field.Reveal(x2, y2);
+                    log.AddMove(x2, y2, Move.Reveal);
+                    result = true;
+                }
+                else if (fieldData[x2, y2].TotalFlagged == fieldData[x2, y2].TotalCombos)
+                {
+                    Field.Flag(x2, y2);
+                    log.AddMove(x2, y2, Move.Flag);
+                    result = true;
+                }
+            }
 
-            return true;
+            foreach (var coord in hidden)
+            {
+                fieldData[coord].TotalCombos = 0;
+                fieldData[coord].TotalFlagged = 0;
+            }
+
+            return result;
         }
 
-        private List<Combo> GetValidCombos(int x, int y)
+
+        private void CalcTotals(int x, int y)
         {
-            List<Combo> valid = new List<Combo>();
+            int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
+
+            var hidden = GetHiddenUnused(x, y);
+
+            var combos = comboLibrary[hidden.Count, nFlagsToComplete];
+
+            var effected = new HashSet<(int X, int Y)>();
+
+            foreach (var (x2, y2) in hidden)
+            {
+                effected.UnionWith(GetValues(x2, y2));
+            }
+
+            foreach (var combo in combos)
+            {
+                combo.Apply(Field, fieldData, hidden);
+
+                if (effected.All(coord => IsCoordValid(coord.X, coord.Y)))
+                {
+                    foreach (var coord in hidden)
+                    {
+                        fieldData[coord].TotalCombos++;
+
+                        if (fieldData[coord].IsMine)
+                        {
+                            fieldData[coord].TotalFlagged++;
+                        }
+                    }
+                }
+
+                combo.Remove(Field, fieldData, hidden);
+            }
+        }
+
+        private bool AreValidCombos(int x, int y)
+        {
+            bool result = false;
 
             int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
 
@@ -105,36 +145,35 @@ namespace Minesolver.Solvers
 
             if (hidden.Count < nFlagsToComplete)
             {
-                return valid;
+                return result;
+            }
+
+            var effected = new HashSet<(int X, int Y)>();
+
+            foreach (var (x2, y2) in hidden)
+            {
+                effected.UnionWith(GetValues(x2, y2));
             }
 
             var combos = comboLibrary[hidden.Count, nFlagsToComplete];
 
-            foreach(var combo in combos)
+            foreach (var combo in combos)
             {
-                var effected = new HashSet<(int X, int Y)>();
-
-                combo.Apply(Field, fieldData, hidden);
-
-                foreach (var (x2, y2) in hidden)
-                {
-                    effected.UnionWith(GetValues(x2, y2));
-                }
+                combo.Apply(Field, fieldData, hidden);                
 
                 if (effected.All(coord => IsCoordValid(coord.X, coord.Y)))
                 {
-                    valid.Add(combo);
+                    result = true;
+
+                    combo.Remove(Field, fieldData, hidden);
+
+                    break;
                 }
 
-                combo.Remove(Field, fieldData, hidden);           
+                combo.Remove(Field, fieldData, hidden);
             }
 
-            return valid;
-        }
-
-        private List<(int X, int Y)> GetHiddenUnused(int x, int y)
-        {
-            return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
+            return result;
         }
 
         private bool IsCoordValid(int x, int y)
@@ -142,45 +181,36 @@ namespace Minesolver.Solvers
             int nMines = fieldData[x, y].NumMines;
 
             if (nMines > Field[x, y])
-            {
                 return false;
-            }
-            else if (nMines < Field[x, y] && GetValidCombos(x, y).Count == 0)
-            {
+
+            if (nMines < Field[x, y] && AreValidCombos(x, y) == false)
                 return false;
-            }
 
             return true;
         }
 
-        private void ApplyCommonState(bool?[] commonState, List<(int X, int Y)> coords)
+        private List<(int X, int Y)> GetHiddenUnused(int x, int y)
         {
-            if (coords.Count != commonState.Length)
+            return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
+        }
+
+        protected override void Reset()
+        {
+            log.Clear();
+
+            for (int x = 0; x < width; x++)
             {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            for (int i = 0; i < commonState.Length; i++)
-            {
-                if (commonState[i] == null)
-                    continue;
-
-                var (x, y) = coords[i];
-
-                if(commonState[i] == true)
+                for (int y = 0; y < height; y++)
                 {
-                    Field.Flag(x, y);
-                    log.AddMove(x, y, Move.Flag);             
-                }
-                else
-                { 
-                    Field.Reveal(x, y);
-                    log.AddMove(x, y, Move.Reveal);
+                    fieldData[x, y].IsSolved = false;
+                    fieldData[x, y].TryAdvanced = true;
+                    fieldData[x, y].TotalFlagged = 0;
+                    fieldData[x, y].TotalCombos = 0;
                 }
             }
         }
 
-        private void UpdateFieldData(MineFieldBase oldField)
+        private void UpdateFieldChanges(MineFieldBase oldField)
         {
             for (int x = 0; x < width; x++)
             {
@@ -190,13 +220,13 @@ namespace Minesolver.Solvers
                     {
                         if (fieldData[x, y].IsValue)
                         {
-                            UpdateCoordData(x, y);
+                            UpdateCoordChanges(x, y);
                         }
                         else
                         {
                             foreach (var (x2, y2) in GetUnsolved(x, y))
                             {
-                                UpdateCoordData(x2, y2);
+                                UpdateCoordChanges(x2, y2);
                             }
                         }
                     }
@@ -205,7 +235,7 @@ namespace Minesolver.Solvers
 
         }
 
-        private void UpdateCoordData(int x, int y)
+        private void UpdateCoordChanges(int x, int y)
         {
             if (fieldData[x, y].TryAdvanced)
                 return;
@@ -214,8 +244,9 @@ namespace Minesolver.Solvers
 
             foreach (var (x2, y2) in GetUnsolved(x, y))
             {
-                UpdateCoordData(x2, y2);
+                UpdateCoordChanges(x2, y2);
             }
         }
+
     }
 }

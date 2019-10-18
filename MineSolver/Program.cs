@@ -1,4 +1,6 @@
-﻿using Minesolver.Solvers;
+﻿using System;
+using Minesolver.Solvers;
+using Minesolver.Solvers.Utils;
 
 namespace Minesolver
 {
@@ -6,14 +8,34 @@ namespace Minesolver
     {
         static void Main()
         {
-            MineField field1 = new MineField(250, 65, 1);
-            SolverBasic solverSimple1 = new SolverBasic(field1);
-            SolverAdvanced solverAdvanced1 = new SolverAdvanced(field1, solverSimple1);
-         
-            OnlineGraphics.Subscibe(field1);
+            // TODO: MAKE SOLVERS STATIC!!!
 
-            solverAdvanced1.Solve();
-           
+            MineField field = new MineField(205, 65);
+
+            SolverAdvanced solver1 = new SolverAdvanced(field);
+
+            OnlineGraphics.Subscibe(field);
+
+            //field2.Generate(0.2, 5, 5);
+            //field2.Reveal(5, 5);
+
+            //solver2.Solve();
+
+            //Console.WriteLine(Benchmarks.CountUnsolved(solver1, 10));
+            //Console.WriteLine(Benchmarks.CountUnsolved(solver2, 10));
+            Console.WriteLine(Benchmarks.MeasureTime(solver1, 20, 5));
+
+
+            //OnlineGraphics.Subscibe(field1);
+
+            //field1.Generate(0.2, 5, 5);
+            //field1.Reveal(5, 5);
+
+
+
+            //solverPrecent.Solve();
+
+            Console.ReadKey();          
         }
 
     }

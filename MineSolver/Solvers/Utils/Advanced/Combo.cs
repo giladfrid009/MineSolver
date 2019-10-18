@@ -72,29 +72,5 @@ namespace Minesolver.Solvers.Utils.Advanced
                 }
             }
         }
-
-        public static (bool?[] CommonState, bool AreCommon) GetCommonState(List<Combo> combos)
-        {
-            var comboFirst = combos[0];
-            var length = comboFirst.Length;
-
-            bool?[] common = new bool?[length];
-
-            for (int i = 0; i < length; i++)
-            {
-                common[i] = comboFirst[i];
-
-                foreach (var combo in combos)
-                {
-                    if (combo[i] != common[i])
-                    {
-                        common[i] = null;
-                        break;
-                    }
-                }
-            }
-
-            return (common, common.Any(state => state != null));
-        }
     }
 }

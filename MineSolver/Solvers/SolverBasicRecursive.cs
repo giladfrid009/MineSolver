@@ -22,7 +22,7 @@ namespace Minesolver.Solvers
                 }
             }
 
-            return log;
+            return log.Clone();
         }
 
         private void SolveCoord(int x, int y)

@@ -2,7 +2,9 @@
 {
     public class CoordDataAdvanced : CoordData
     {
-        public bool TryAdvanced { get; set; } = true;        
-        public bool UsedInCombo { get; set; } = false;
+        public bool TryAdvanced = true;
+        public bool UsedInCombo = false;
+        public uint TotalFlagged = 0;
+        public uint TotalCombos = 0;
     }
 }

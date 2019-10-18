@@ -8,6 +8,9 @@ namespace Minesolver
 
         public static void Subscibe(MineFieldBase field)
         {
+            Console.WindowWidth = Console.LargestWindowWidth;
+            Console.WindowHeight = Console.LargestWindowHeight;
+
             field.OnFlag += PrintMine;
             field.OnUnflag += PrintHidden;
             field.OnReveal += PrintVal;

@@ -5,15 +5,15 @@ namespace Minesolver.Solvers.Utils
 {
     public static class Benchmarks
     {
-        public static TimeSpan TestSpeed<TCoordData>(SolverBase<TCoordData> solver, int iterations) where TCoordData : CoordData, new()
+        public static TimeSpan MeasureTime<TCoordData>(SolverBase<TCoordData> solver, int iterations, int seed) where TCoordData : CoordData, new()
         {
-            Stopwatch stopwatch = new Stopwatch();
-
+            var rnd = new Random(seed);
+            var stopwatch = new Stopwatch();
             var field = (MineField)solver.Field;
 
             for (int i = 0; i < iterations; i++)
             {
-                field.Generate(0.2, field.Width / 2, field.Height / 2, 3);
+                field.Generate(0.2, field.Width / 2, field.Height / 2, 3, rnd.Next(0, int.MaxValue));
                 field.Reveal(field.Width / 2, field.Height / 2);
 
                 stopwatch.Start();
@@ -24,9 +24,10 @@ namespace Minesolver.Solvers.Utils
             return stopwatch.Elapsed;
         }
 
-        public static int MeasureEffectiveness<TCoordData>(SolverBase<TCoordData> solver, int iterations)
+        public static int CountUnsolved<TCoordData>(SolverBase<TCoordData> solver, int iterations, int seed)
             where TCoordData : CoordData, new()
         {
+            var rnd = new Random(seed);
             var field = (MineField)solver.Field;
 
             int width = field.Width;
@@ -36,8 +37,7 @@ namespace Minesolver.Solvers.Utils
 
             for (int i = 0; i < iterations; i++)
             {
-                field.Generate(0.2, width / 2, height / 2, 3);
-
+                field.Generate(0.2, width / 2, height / 2, 3, rnd.Next(0, int.MaxValue));
                 field.Reveal(width / 2, height / 2);
 
                 solver.Solve();

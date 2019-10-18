@@ -5,17 +5,15 @@ namespace Minesolver
 {
     public class MineField : MineFieldBase
     {
-        private readonly Random rnd = new Random();
+        private static readonly Random staticRnd = new Random();
 
         private readonly int[,] fieldSolved;
         private readonly int[,] fieldUnsolved;
 
-        public MineField(int width, int height, int? seed = null) : base(width, height)
+        public MineField(int width, int height) : base(width, height)
         {
             fieldSolved = new int[Width, Height];
             fieldUnsolved = new int[Width, Height];
-
-            rnd = seed == null ? new Random() : new Random(seed.Value);
         }
 
         public override int this[int x, int y]
@@ -36,8 +34,8 @@ namespace Minesolver
             }
             else if (coordVal == Mine)
             {
-                // todo: remove eventially
-                throw new Exception("You lost.");
+                RaiseOnLose();
+                throw new Exception();
             }
 
             fieldUnsolved[x, y] = coordVal;
@@ -81,13 +79,15 @@ namespace Minesolver
             }
         }
 
-        public void Generate(double minePrecent, int xOrigin, int yOrigin, int originSize = 2)
+        public void Generate(double minePrecent, int xOrigin, int yOrigin, int originSize = 3, int? seed = null)
         {
             Reset();
 
             GenerateOrigin(xOrigin, yOrigin, originSize);
 
-            GenerateMines((int)(minePrecent * Width * Height));
+            Random rnd = new Random(seed ?? staticRnd.Next(int.MinValue, int.MaxValue));
+
+            GenerateMines((int)(minePrecent * Width * Height), rnd);
 
             GenerateVals();
         }
@@ -105,7 +105,7 @@ namespace Minesolver
             }
         }
 
-        private void GenerateMines(int nMines)
+        private void GenerateMines(int nMines, Random rnd)
         {
             List<(int, int)> freeCoords = new List<(int, int)>(Width * Height);
 

@@ -6,12 +6,13 @@ namespace Minesolver
 {
     public abstract class MineFieldBase : IClonable<MineFieldBase>
     {
-        public event PrintMineFunc OnFlag;
-        public event PrintMineFunc OnUnflag;
-        public event PrintValFunc OnReveal;
+        public event Action OnLose;
+        public event FlagFunc OnFlag;
+        public event FlagFunc OnUnflag;
+        public event ValueFunc OnReveal;
 
-        public delegate void PrintMineFunc(int x, int y);
-        public delegate void PrintValFunc(int x, int y, int val);
+        public delegate void FlagFunc(int x, int y);
+        public delegate void ValueFunc(int x, int y, int val);
 
         public int Width { get; }
         public int Height { get; }
@@ -49,6 +50,11 @@ namespace Minesolver
         protected void RaiseOnReveal(int x, int y, int val)
         {
             OnReveal?.Invoke(x, y, val);
+        }
+
+        protected void RaiseOnLose()
+        {
+            OnLose?.Invoke();
         }
 
         public List<(int X, int Y)> GetNeighbors(int x, int y)

@@ -34,7 +34,7 @@ namespace Minesolver.Solvers
                 }
             }
 
-            return log;
+            return log.Clone();
         }
 
         private List<(int X, int Y)> SolveCoord(int x, int y)
