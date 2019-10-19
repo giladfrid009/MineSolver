@@ -8,7 +8,7 @@ namespace Minesolver.Solvers
     public abstract class SolverBase<TCoordData> where TCoordData : CoordData, new()
     {
         public MineFieldBase Field { get; }
-        public bool HasLost { get; private set; } = false;
+        public bool HasLost { get; protected set; } = false;
 
         protected readonly FieldData<TCoordData> fieldData;
         protected readonly SolveLog log;

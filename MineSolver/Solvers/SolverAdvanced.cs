@@ -107,18 +107,18 @@ namespace Minesolver.Solvers
 
             Combo[] combos = comboLibrary[hidden.Count, nFlagsToComplete];
 
-            HashSet<(int X, int Y)> effected = new HashSet<(int X, int Y)>();
+            HashSet<(int X, int Y)> affected = new HashSet<(int X, int Y)>();
 
             foreach ((int x2, int y2) in hidden)
             {
-                effected.UnionWith(GetValues(x2, y2));
+                affected.UnionWith(GetValues(x2, y2));
             }
 
             foreach (Combo combo in combos)
             {
                 combo.Apply(Field, fieldData, hidden);
 
-                if (effected.All(coord => IsCoordValid(coord.X, coord.Y)))
+                if (affected.All(coord => IsCoordValid(coord.X, coord.Y)))
                 {
                     foreach ((int X, int Y) coord in hidden)
                     {
@@ -165,11 +165,11 @@ namespace Minesolver.Solvers
                 return result;
             }
 
-            HashSet<(int X, int Y)> effected = new HashSet<(int X, int Y)>();
+            HashSet<(int X, int Y)> affected = new HashSet<(int X, int Y)>();
 
             foreach ((int x2, int y2) in hidden)
             {
-                effected.UnionWith(GetValues(x2, y2));
+                affected.UnionWith(GetValues(x2, y2));
             }
 
             Combo[] combos = comboLibrary[hidden.Count, nFlagsToComplete];
@@ -178,7 +178,7 @@ namespace Minesolver.Solvers
             {
                 combo.Apply(Field, fieldData, hidden);
 
-                if (effected.All(coord => IsCoordValid(coord.X, coord.Y)))
+                if (affected.All(coord => IsCoordValid(coord.X, coord.Y)))
                 {
                     result = true;
 
@@ -202,7 +202,7 @@ namespace Minesolver.Solvers
         {
             log.Clear();
 
-            hasLost = false;
+            HasLost = false;
 
             for (int x = 0; x < width; x++)
             {

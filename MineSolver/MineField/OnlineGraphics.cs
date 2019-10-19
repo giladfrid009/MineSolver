@@ -4,8 +4,6 @@ namespace Minesolver
 {
     public static class OnlineGraphics
     {
-        public static char MineChar = '@';
-
         public static void Subscibe(MineFieldBase field)
         {
             Console.WindowWidth = Console.LargestWindowWidth;
@@ -30,7 +28,7 @@ namespace Minesolver
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.SetCursorPosition(x, y);
-            Console.Write(MineChar);
+            Console.Write('@');
             Console.ForegroundColor = ConsoleColor.Gray;
         }
 
@@ -50,7 +48,7 @@ namespace Minesolver
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.SetCursorPosition(x, y);
-            Console.Write(MineChar);
+            Console.Write('@');
             Console.ForegroundColor = ConsoleColor.Gray;
         }
     }

@@ -21,6 +21,8 @@ namespace Minesolver.Solvers
 
             while (true)
             {
+                MineFieldBase oldField = Field.Clone();
+
                 log.Combine(solverAdvanced.Solve());
 
                 if (HasLost)
@@ -36,7 +38,7 @@ namespace Minesolver.Solvers
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
-                    {
+                    {                        
                         CalcTotals(x, y);
                     }
                 }
@@ -48,14 +50,13 @@ namespace Minesolver.Solvers
                     break;
                 }
 
-                ResetTotals();
+                UpdateFieldChanges(oldField);
             }
 
             return log.Clone();
         }
 
-        // todo: why precentage are not correct?!
-        // todo: FIX PRECENTAGE!
+        // todo: verify that precentage are correct
         private bool CalcTotals(int x, int y)
         {
             bool result = false;
@@ -64,7 +65,6 @@ namespace Minesolver.Solvers
             {
                 return result;
             }
-
             int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
 
             List<(int X, int Y)> hidden = GetHiddenUnused(x, y);
@@ -76,18 +76,18 @@ namespace Minesolver.Solvers
 
             Combo[] combos = comboLibrary[hidden.Count, nFlagsToComplete];
 
-            HashSet<(int X, int Y)> effected = new HashSet<(int X, int Y)>();
+            HashSet<(int X, int Y)> affected = new HashSet<(int X, int Y)>();
 
             foreach ((int x2, int y2) in hidden)
             {
-                effected.UnionWith(GetValues(x2, y2));
+                affected.UnionWith(GetValues(x2, y2));
             }
 
             foreach (Combo combo in combos)
             {
                 combo.Apply(Field, fieldData, hidden);
 
-                if (effected.All(coord => IsCoordValid(coord.X, coord.Y)))
+                if (affected.All(coord => IsCoordValid(coord.X, coord.Y)))
                 {
                     result = true;
 
@@ -178,28 +178,60 @@ namespace Minesolver.Solvers
         {
             log.Clear();
 
-            hasLost = false;
+            HasLost = false;
 
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
                     fieldData[x, y].IsSolved = false;
-                    fieldData[x, y].TotalFlagged = 0;
+                    fieldData[x, y].TryAdvanced = true;
                     fieldData[x, y].TotalCombos = 0;
+                    fieldData[x, y].TotalFlagged = 0;
                 }
             }
         }
 
-        private void ResetTotals()
+        // todo: find a better way of finging what has changed.
+        private void UpdateFieldChanges(MineFieldBase oldField)
         {
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    fieldData[x, y].TotalFlagged = 0;
-                    fieldData[x, y].TotalCombos = 0;
+                    if (oldField[x, y] != Field[x, y])
+                    {
+                        if (fieldData[x, y].IsValue)
+                        {
+                            UpdateCoordChanges(x, y);
+                        }
+                        else
+                        {
+                            foreach ((int x2, int y2) in GetUnsolved(x, y))
+                            {
+                                UpdateCoordChanges(x2, y2);
+                            }
+                        }
+                    }
                 }
+            }
+
+        }
+
+        private void UpdateCoordChanges(int x, int y)
+        {
+            if (fieldData[x, y].TryAdvanced)
+            {
+                return;
+            }
+
+            fieldData[x, y].TryAdvanced = true;
+            fieldData[x, y].TotalCombos = 0;
+            fieldData[x, y].TotalFlagged = 0;
+
+            foreach ((int x2, int y2) in GetUnsolved(x, y))
+            {
+                UpdateCoordChanges(x2, y2);
             }
         }
     }
