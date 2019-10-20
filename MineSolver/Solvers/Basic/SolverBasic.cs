@@ -1,5 +1,5 @@
-﻿using Minesolver.Solvers.Utils;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Minesolver.Solvers.Basic;
 
 namespace Minesolver.Solvers
 {

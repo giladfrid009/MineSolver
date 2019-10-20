@@ -1,7 +1,7 @@
-﻿using Minesolver.Solvers.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Minesolver.Solvers.Basic;
 
 namespace Minesolver.Solvers
 {
@@ -44,7 +44,7 @@ namespace Minesolver.Solvers
             {
                 if (Field[x2, y2] == 0)
                 {
-                    List<(int X, int Y)> opened = GetAreaBounds(x2, y2);
+                    List<(int X, int Y)> opened = GetOpenAreaBounds(x2, y2);
 
                     affected.UnionWith(opened);
 
@@ -98,7 +98,7 @@ namespace Minesolver.Solvers
             return GetValues(x, y).Where(coord => fieldData[coord].IsSolved == false).ToList();
         }
 
-        protected List<(int X, int Y)> GetAreaBounds(int x, int y)
+        protected List<(int X, int Y)> GetOpenAreaBounds(int x, int y)
         {
             HashSet<(int X, int Y)> coords = new HashSet<(int X, int Y)>();
 

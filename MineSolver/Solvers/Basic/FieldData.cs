@@ -1,4 +1,4 @@
-﻿namespace Minesolver.Solvers.Utils
+﻿namespace Minesolver.Solvers.Basic
 {
     public class FieldData<TCoordInfo> where TCoordInfo : CoordData, new()
     {

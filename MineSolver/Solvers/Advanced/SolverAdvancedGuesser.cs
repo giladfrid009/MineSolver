@@ -1,18 +1,17 @@
-﻿using Minesolver.Solvers.Utils.Advanced;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Minesolver.Solvers.Advanced;
 
 namespace Minesolver.Solvers
 {
-    internal class SolverAdvancedGuesser : SolverBase<CoordDataAdvanced>
+    internal class SolverAdvancedGuesser : SolverAdvancedBase
     {
         private readonly SolverAdvanced solverAdvanced;
-        private readonly ComboLibrary comboLibrary;
+        public double testVal = 0;
 
         public SolverAdvancedGuesser(MineFieldBase field) : base(field)
         {
             solverAdvanced = new SolverAdvanced(field);
-            comboLibrary = new ComboLibrary();
         }
 
         public override SolveLog Solve()
@@ -24,6 +23,8 @@ namespace Minesolver.Solvers
                 MineFieldBase oldField = Field.Clone();
 
                 log.Combine(solverAdvanced.Solve());
+
+                UpdateField(oldField);
 
                 if (HasLost)
                 {
@@ -38,19 +39,27 @@ namespace Minesolver.Solvers
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
-                    {                        
+                    {
+                        if (fieldData[x, y].TryAdvanced == false)
+                            continue;
+
                         CalcTotals(x, y);
+
+                        fieldData[x, y].TryAdvanced = false;
                     }
                 }
 
-                PerformBestMove();
+                if (PerformBestMove() == false)
+                {
+                    return log.Clone();
+                }
 
                 if (HasLost)
                 {
                     break;
                 }
 
-                UpdateFieldChanges(oldField);
+                UpdateField(oldField);
             }
 
             return log.Clone();
@@ -125,7 +134,7 @@ namespace Minesolver.Solvers
             return true;
         }
 
-        private void PerformBestMove()
+        private bool PerformBestMove()
         {
             double minPrecent = 1.0;
             double maxPrecent = 0.0;
@@ -157,82 +166,38 @@ namespace Minesolver.Solvers
                 }
             }
 
+            if(minPrecent == 0.0 && maxPrecent == 1.0)
+            {            
+                throw new System.Exception();
+            }
+
+            if(minPrecent == 1.0 && maxPrecent == 0.0)
+            {
+                return false;
+            }
+
             if (minPrecent < 1 - maxPrecent)
             {
                 Field.Reveal(minCoord.X, minCoord.Y);
                 log.AddMove(minCoord.X, minCoord.Y, Move.Reveal);
+
+                // todo: test
+                if(HasLost == false)
+                {
+                    testVal += minPrecent;
+                }
+                else
+                {
+                    testVal -= 1 - minPrecent;
+                }
             }
             else
             {
                 Field.Flag(maxCoord.X, maxCoord.Y);
                 log.AddMove(maxCoord.X, maxCoord.Y, Move.Flag);
             }
-        }
 
-        private List<(int X, int Y)> GetHiddenUnused(int x, int y)
-        {
-            return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
-        }
-
-        protected override void Reset()
-        {
-            log.Clear();
-
-            HasLost = false;
-
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    fieldData[x, y].IsSolved = false;
-                    fieldData[x, y].TryAdvanced = true;
-                    fieldData[x, y].TotalCombos = 0;
-                    fieldData[x, y].TotalFlagged = 0;
-                }
-            }
-        }
-
-        // todo: find a better way of finging what has changed.
-        private void UpdateFieldChanges(MineFieldBase oldField)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    if (oldField[x, y] != Field[x, y])
-                    {
-                        if (fieldData[x, y].IsValue)
-                        {
-                            UpdateCoordChanges(x, y);
-                        }
-                        else
-                        {
-                            foreach ((int x2, int y2) in GetUnsolved(x, y))
-                            {
-                                UpdateCoordChanges(x2, y2);
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-
-        private void UpdateCoordChanges(int x, int y)
-        {
-            if (fieldData[x, y].TryAdvanced)
-            {
-                return;
-            }
-
-            fieldData[x, y].TryAdvanced = true;
-            fieldData[x, y].TotalCombos = 0;
-            fieldData[x, y].TotalFlagged = 0;
-
-            foreach ((int x2, int y2) in GetUnsolved(x, y))
-            {
-                UpdateCoordChanges(x2, y2);
-            }
+            return true;
         }
     }
 }

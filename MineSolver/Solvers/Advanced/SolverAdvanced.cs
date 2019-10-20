@@ -1,18 +1,16 @@
-﻿using Minesolver.Solvers.Utils.Advanced;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Minesolver.Solvers.Advanced;
 
 namespace Minesolver.Solvers
 {
-    internal class SolverAdvanced : SolverBase<CoordDataAdvanced>
+    internal class SolverAdvanced : SolverAdvancedBase
     {
         private readonly SolverBasic solverBasic;
-        private readonly ComboLibrary comboLibrary;
 
         public SolverAdvanced(MineFieldBase field) : base(field)
         {
             solverBasic = new SolverBasic(field);
-            comboLibrary = new ComboLibrary();
         }
 
         public override SolveLog Solve()
@@ -28,6 +26,8 @@ namespace Minesolver.Solvers
                 progress = false;
 
                 log.Combine(solverBasic.Solve());
+
+                UpdateField(oldField);
 
                 for (int x = 0; x < width; x++)
                 {
@@ -47,7 +47,7 @@ namespace Minesolver.Solvers
                     break;
                 }
 
-                UpdateFieldChanges(oldField);
+                UpdateField(oldField);
             }
 
             return log.Clone();
@@ -73,6 +73,7 @@ namespace Minesolver.Solvers
 
             List<(int X, int Y)> hidden = GetHidden(x, y);
 
+
             foreach ((int x2, int y2) in hidden)
             {
                 if (fieldData[x2, y2].TotalFlagged == 0)
@@ -89,15 +90,36 @@ namespace Minesolver.Solvers
                 }
             }
 
-            foreach ((int X, int Y) coord in hidden)
+            //HashSet<(int, int)> affected = new HashSet<(int, int)>();
+
+            //foreach ((int x2, int y2) in hidden)
+            //{
+            //    if (fieldData[x2, y2].TotalFlagged == 0)
+            //    {
+            //        GetConnectedArea(x2, y2, affected);
+            //    }
+            //    else if (fieldData[x2, y2].TotalFlagged == fieldData[x2, y2].TotalCombos)
+            //    {
+            //        foreach (var (x3, y3) in GetUnsolved(x2, y2))
+            //        {
+            //            GetConnectedArea(x3, y3, affected);
+            //        }
+            //    }
+            //}
+
+            //foreach (var (x2, y2) in affected)
+            //{
+            //    ResetCoordData(x2, y2);
+            //}
+
+            foreach (var coord in hidden)
             {
                 fieldData[coord].TotalCombos = 0;
                 fieldData[coord].TotalFlagged = 0;
-            }
+            }       
 
             return result;
         }
-
 
         private void CalcTotals(int x, int y)
         {
@@ -192,69 +214,5 @@ namespace Minesolver.Solvers
 
             return result;
         }
-
-        private List<(int X, int Y)> GetHiddenUnused(int x, int y)
-        {
-            return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
-        }
-
-        protected override void Reset()
-        {
-            log.Clear();
-
-            HasLost = false;
-
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    fieldData[x, y].IsSolved = false;
-                    fieldData[x, y].TryAdvanced = true;
-                    fieldData[x, y].TotalFlagged = 0;
-                    fieldData[x, y].TotalCombos = 0;
-                }
-            }
-        }
-
-        private void UpdateFieldChanges(MineFieldBase oldField)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    if (oldField[x, y] != Field[x, y])
-                    {
-                        if (fieldData[x, y].IsValue)
-                        {
-                            UpdateCoordChanges(x, y);
-                        }
-                        else
-                        {
-                            foreach ((int x2, int y2) in GetUnsolved(x, y))
-                            {
-                                UpdateCoordChanges(x2, y2);
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-
-        private void UpdateCoordChanges(int x, int y)
-        {
-            if (fieldData[x, y].TryAdvanced)
-            {
-                return;
-            }
-
-            fieldData[x, y].TryAdvanced = true;
-
-            foreach ((int x2, int y2) in GetUnsolved(x, y))
-            {
-                UpdateCoordChanges(x2, y2);
-            }
-        }
-
     }
 }

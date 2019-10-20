@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Minesolver.Solvers.Basic;
 
-namespace Minesolver.Solvers.Utils.Advanced
+namespace Minesolver.Solvers.Advanced
 {
     public class Combo
     {

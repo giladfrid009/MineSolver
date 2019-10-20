@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Minesolver.Solvers.Utils
+namespace Minesolver.Solvers.Basic
 {
     public class CoordData
     {
