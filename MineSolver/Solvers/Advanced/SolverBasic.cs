@@ -3,7 +3,7 @@ using Minesolver.Solvers.Basic;
 
 namespace Minesolver.Solvers
 {
-    public class SolverBasic : SolverBase<CoordData>
+    public class SolverBasic : SolverBasicBase
     {
         public SolverBasic(MineFieldBase field) : base(field)
         {
@@ -39,7 +39,7 @@ namespace Minesolver.Solvers
 
         private HashSet<(int X, int Y)> SolveCoord(int x, int y)
         {
-            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false) || HasLost)
+            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
             {
                 return new HashSet<(int, int)>();
             }

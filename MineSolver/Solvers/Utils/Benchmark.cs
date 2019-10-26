@@ -16,6 +16,11 @@ namespace Minesolver.Solvers.Utils
             }
         }
 
+        private static void PrintLog(int iteration, int seed)
+        {
+            Console.WriteLine(string.Format("Iter: {0} | Seed: {1}", iteration, seed));
+        }
+
         public static TimeSpan MeasureTime<TCoordData>(SolverBase<TCoordData> solver, int iterations, int? seed = null) where TCoordData : CoordData, new()
         {
             CheckCompatibility(solver);
@@ -29,8 +34,11 @@ namespace Minesolver.Solvers.Utils
 
             for (int i = 0; i < iterations; i++)
             {
-                field.Generate(0.2, xMid, yMid, 3, rnd.Next(int.MinValue, int.MaxValue));
-                field.Reveal(xMid, yMid);
+                int localSeed = rnd.Next();
+
+                PrintLog(i, localSeed);
+
+                field.Generate(0.2, xMid, yMid, 3, localSeed);
 
                 stopwatch.Start();
                 solver.Solve();
@@ -57,8 +65,11 @@ namespace Minesolver.Solvers.Utils
 
             for (int i = 0; i < iterations; i++)
             {
-                field.Generate(0.2, xMid, yMid, 3, rnd.Next(0, int.MaxValue));
-                field.Reveal(xMid, yMid);
+                int localSeed = rnd.Next();
+
+                PrintLog(i, localSeed);
+
+                field.Generate(0.2, xMid, yMid, 3, localSeed);
 
                 solver.Solve();
 
@@ -89,8 +100,11 @@ namespace Minesolver.Solvers.Utils
 
             for (int i = 0; i < iterations; i++)
             {
-                field.Generate(0.2, xMid, yMid, 3, rnd.Next(0, int.MaxValue));
-                field.Reveal(xMid, yMid);
+                int localSeed = rnd.Next();
+
+                PrintLog(i, localSeed);
+
+                field.Generate(0.2, xMid, yMid, 3, localSeed);
 
                 solver.Solve();
 

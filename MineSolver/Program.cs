@@ -16,7 +16,11 @@ namespace Minesolver
 
             SolverAdvancedGuesser solverGuesser = new SolverAdvancedGuesser(field);
 
-            //OnlineGraphics.Subscibe(field);
+            OnlineGraphics.Subscibe(field);
+
+            field.Generate(0.2, field.Width / 2, field.Height / 2, 3, 1389454863);
+
+            solverAdvanced.Solve();
 
             double testValTotal = 0;
 
@@ -25,20 +29,21 @@ namespace Minesolver
             // todo: precentage isn't right
             // maybe also cuz of tryAdvnced = false
 
-            // todo: fix this bug.
-            //Benchmarks.CountUnsolved(solverGuesser, 1, 157);
-
             int totalUnsolved = 0;
 
-            for (int i = 0; i < iterations; i++)
-            {
-                Console.WriteLine(i);
-                totalUnsolved += Benchmarks.CountUnsolved(solverAdvanced, 1, i);
-                Console.WriteLine(totalUnsolved);
-                //testValTotal += solverGuesser.testVal;
-            }
+            //Console.WriteLine(Benchmarks.CountUnsolved(solverAdvanced, 500, 0));
 
-            Console.WriteLine(testValTotal / iterations);
+            Console.WriteLine(Benchmarks.CountUnsolved(solverAdvanced, 1000, 0));
+
+            //for (int i = 0; i < iterations; i++)
+            //{
+            //    Console.WriteLine(i);
+            //    totalUnsolved += Benchmarks.CountUnsolved(solverAdvanced, 1, i);
+            //    Console.WriteLine(totalUnsolved);
+            //    //testValTotal += solverGuesser.testVal;
+            //}
+
+            //Console.WriteLine(testValTotal / iterations);
 
             Console.ReadKey();
         }

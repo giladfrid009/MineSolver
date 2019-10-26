@@ -3,7 +3,7 @@ using Minesolver.Solvers.Basic;
 
 namespace Minesolver.Solvers
 {
-    public class SolverBasicRecursive : SolverBase<CoordData>
+    public class SolverBasicRecursive : SolverBasicBase
     {
         public SolverBasicRecursive(MineFieldBase field) : base(field)
         {
@@ -27,7 +27,7 @@ namespace Minesolver.Solvers
 
         private void SolveCoord(int x, int y)
         {
-            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false) || HasLost)
+            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
             {
                 return;
             }

@@ -17,7 +17,7 @@ namespace Minesolver.Solvers.Advanced
             return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
         }
 
-        protected void UpdateField(MineFieldBase oldField)
+        protected void UpdateFieldData(MineFieldBase oldField)
         {
             HashSet<(int, int)> affected = new HashSet<(int, int)>();
 
@@ -27,13 +27,13 @@ namespace Minesolver.Solvers.Advanced
                 {
                     if (oldField[x, y] != Field[x, y])
                     {
-                        UpdateCoord(x, y, affected);
+                        UpdateCoordData(x, y, affected);
                     }
                 }
             }
         }
 
-        protected void UpdateCoord(int x, int y, HashSet<(int, int)> affected)
+        protected void UpdateCoordData(int x, int y, HashSet<(int, int)> affected)
         {
             if (fieldData[x, y].IsValue)
             {
@@ -65,13 +65,25 @@ namespace Minesolver.Solvers.Advanced
             {
                 UpdateCoordRecursive(x2, y2, coords);
             }
+
+            foreach ((int x2, int y2) in GetHidden(x, y))
+            {
+                if (coords.Contains((x2, y2)))
+                    continue;
+
+                coords.Add((x2, y2));
+
+                foreach ((int x3, int y3) in GetUnsolved(x2, y2))
+                {
+                    UpdateCoordRecursive(x3, y3, coords);
+                }
+            }
         }
 
         protected override void Reset()
         {
             log.Clear();
 
-            // todo: potential problem of continuing solving after resseting hasLost to false.
             HasLost = false;
 
             for (int x = 0; x < width; x++)

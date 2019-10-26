@@ -27,7 +27,7 @@ namespace Minesolver.Solvers
 
                 log.Combine(solverBasic.Solve());
 
-                UpdateField(oldField);
+                UpdateFieldData(oldField);
 
                 for (int x = 0; x < width; x++)
                 {
@@ -46,8 +46,6 @@ namespace Minesolver.Solvers
                 {
                     break;
                 }
-
-                UpdateField(oldField);
             }
 
             return log.Clone();
@@ -55,24 +53,22 @@ namespace Minesolver.Solvers
 
         private bool SolveCoord(int x, int y)
         {
-            bool result = false;
-
             if (fieldData[x, y].TryAdvanced == false)
             {
-                return result;
+                return false;
             }
 
             fieldData[x, y].TryAdvanced = false;
 
-            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false) || HasLost)
+            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
             {
-                return result;
+                return false;
             }
 
             CalcTotals(x, y);
 
-            List<(int X, int Y)> hidden = GetHidden(x, y);
-
+            var hidden = GetHidden(x, y);
+            var solved = new List<(int, int)>();
 
             foreach ((int x2, int y2) in hidden)
             {
@@ -80,37 +76,22 @@ namespace Minesolver.Solvers
                 {
                     Field.Reveal(x2, y2);
                     log.AddMove(x2, y2, Move.Reveal);
-                    result = true;
+                    solved.Add((x2, y2));
                 }
                 else if (fieldData[x2, y2].TotalFlagged == fieldData[x2, y2].TotalCombos)
                 {
                     Field.Flag(x2, y2);
                     log.AddMove(x2, y2, Move.Flag);
-                    result = true;
+                    solved.Add((x2, y2));
                 }
             }
 
-            //HashSet<(int, int)> affected = new HashSet<(int, int)>();
+            var affected = new HashSet<(int, int)>();
 
-            //foreach ((int x2, int y2) in hidden)
-            //{
-            //    if (fieldData[x2, y2].TotalFlagged == 0)
-            //    {
-            //        GetConnectedArea(x2, y2, affected);
-            //    }
-            //    else if (fieldData[x2, y2].TotalFlagged == fieldData[x2, y2].TotalCombos)
-            //    {
-            //        foreach (var (x3, y3) in GetUnsolved(x2, y2))
-            //        {
-            //            GetConnectedArea(x3, y3, affected);
-            //        }
-            //    }
-            //}
-
-            //foreach (var (x2, y2) in affected)
-            //{
-            //    ResetCoordData(x2, y2);
-            //}
+            foreach ((int x2, int y2) in solved)
+            {
+                UpdateCoordData(x2, y2, affected);
+            }
 
             foreach (var coord in hidden)
             {
@@ -118,7 +99,7 @@ namespace Minesolver.Solvers
                 fieldData[coord].TotalFlagged = 0;
             }       
 
-            return result;
+            return solved.Count > 0;
         }
 
         private void CalcTotals(int x, int y)
@@ -165,7 +146,8 @@ namespace Minesolver.Solvers
             {
                 return false;
             }
-
+            // todo: do the old way that areValidCombos also try all positions
+            // that way, after trygin to solve one coord, all other coords will be calculated also. (maybe?)
             if (nMines < Field[x, y] && AreValidCombos(x, y) == false)
             {
                 return false;
@@ -176,15 +158,13 @@ namespace Minesolver.Solvers
 
         private bool AreValidCombos(int x, int y)
         {
-            bool result = false;
-
             int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
 
             List<(int X, int Y)> hidden = GetHiddenUnused(x, y);
 
             if (hidden.Count < nFlagsToComplete)
             {
-                return result;
+                return false;
             }
 
             HashSet<(int X, int Y)> affected = new HashSet<(int X, int Y)>();
@@ -202,17 +182,14 @@ namespace Minesolver.Solvers
 
                 if (affected.All(coord => IsCoordValid(coord.X, coord.Y)))
                 {
-                    result = true;
-
                     combo.Remove(Field, fieldData, hidden);
-
-                    break;
+                    return true;
                 }
 
                 combo.Remove(Field, fieldData, hidden);
             }
 
-            return result;
+            return false;
         }
     }
 }

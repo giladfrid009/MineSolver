@@ -16,6 +16,11 @@ namespace Minesolver
             fieldUnsolved = new int[Width, Height];
         }
 
+        public void Set(int x, int y, int val)
+        {
+            fieldUnsolved[x, y] = val;
+        }
+
         public override int this[int x, int y] => fieldUnsolved[x, y];
 
         public override int Reveal(int x, int y)
@@ -84,11 +89,13 @@ namespace Minesolver
 
             GenerateOrigin(xOrigin, yOrigin, originSize);
 
-            Random rnd = new Random(seed ?? staticRnd.Next(int.MinValue, int.MaxValue));
+            Random rnd = new Random(seed ?? staticRnd.Next());
 
             GenerateMines((int)(minePrecent * Width * Height), rnd);
 
             GenerateVals();
+
+            Reveal(xOrigin, yOrigin);
         }
 
         private void GenerateOrigin(int xOrigin, int yOrigin, int size)

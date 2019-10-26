@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System;
 using Minesolver.Solvers.Advanced;
 
 namespace Minesolver.Solvers
@@ -18,23 +19,13 @@ namespace Minesolver.Solvers
         {
             Reset();
 
-            while (true)
+            while (fieldData.IsSolved == false)
             {
                 MineFieldBase oldField = Field.Clone();
 
                 log.Combine(solverAdvanced.Solve());
 
-                UpdateField(oldField);
-
-                if (HasLost)
-                {
-                    break;
-                }
-
-                if (fieldData.IsSolved)
-                {
-                    break;
-                }
+                UpdateFieldData(oldField);
 
                 for (int x = 0; x < width; x++)
                 {
@@ -49,23 +40,27 @@ namespace Minesolver.Solvers
                     }
                 }
 
-                if (PerformBestMove() == false)
+                var (xMin, yMin) = FindMinimum();
+
+                if(xMin == -1)
                 {
-                    return log.Clone();
+                    break;
                 }
+
+                Field.Reveal(xMin, yMin);
+                log.AddMove(xMin, yMin, Move.Reveal);
 
                 if (HasLost)
                 {
                     break;
                 }
 
-                UpdateField(oldField);
+                UpdateCoordData(xMin, yMin, new HashSet<(int, int)>());             
             }
 
             return log.Clone();
         }
 
-        // todo: verify that precentage are correct
         private bool CalcTotals(int x, int y)
         {
             bool result = false;
@@ -74,6 +69,7 @@ namespace Minesolver.Solvers
             {
                 return result;
             }
+
             int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
 
             List<(int X, int Y)> hidden = GetHiddenUnused(x, y);
@@ -134,13 +130,11 @@ namespace Minesolver.Solvers
             return true;
         }
 
-        private bool PerformBestMove()
+        private (int X, int Y) FindMinimum()
         {
             double minPrecent = 1.0;
-            double maxPrecent = 0.0;
 
             (int X, int Y) minCoord = (-1, -1);
-            (int X, int Y) maxCoord = (-1, -1);
 
             for (int x = 0; x < width; x++)
             {
@@ -151,53 +145,23 @@ namespace Minesolver.Solvers
                         continue;
                     }
 
-                    double coordPrecent = (double)fieldData[x, y].TotalFlagged / fieldData[x, y].TotalCombos;
+                    double precent = (double)fieldData[x, y].TotalFlagged / fieldData[x, y].TotalCombos;
 
-                    if (coordPrecent < minPrecent)
+                    if (precent == 0)
                     {
-                        minPrecent = coordPrecent;
+                        Console.SetCursorPosition(x, y);                     
+                        throw new Exception();
+                    }
+
+                    if (precent < minPrecent)
+                    {
+                        minPrecent = precent;
                         minCoord = (x, y);
                     }
-                    else if (coordPrecent > maxPrecent)
-                    {
-                        maxPrecent = coordPrecent;
-                        maxCoord = (x, y);
-                    }
                 }
             }
 
-            if(minPrecent == 0.0 && maxPrecent == 1.0)
-            {            
-                throw new System.Exception();
-            }
-
-            if(minPrecent == 1.0 && maxPrecent == 0.0)
-            {
-                return false;
-            }
-
-            if (minPrecent < 1 - maxPrecent)
-            {
-                Field.Reveal(minCoord.X, minCoord.Y);
-                log.AddMove(minCoord.X, minCoord.Y, Move.Reveal);
-
-                // todo: test
-                if(HasLost == false)
-                {
-                    testVal += minPrecent;
-                }
-                else
-                {
-                    testVal -= 1 - minPrecent;
-                }
-            }
-            else
-            {
-                Field.Flag(maxCoord.X, maxCoord.Y);
-                log.AddMove(maxCoord.X, maxCoord.Y, Move.Flag);
-            }
-
-            return true;
+            return minCoord;           
         }
     }
 }
