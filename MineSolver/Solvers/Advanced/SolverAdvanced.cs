@@ -8,7 +8,7 @@ namespace Minesolver.Solvers
     {
         private readonly SolverBasic solverBasic;
 
-        public SolverAdvanced(MineFieldBase field) : base(field)
+        public SolverAdvanced(FieldBase field) : base(field)
         {
             solverBasic = new SolverBasic(field);
         }
@@ -21,13 +21,13 @@ namespace Minesolver.Solvers
 
             while (true)
             {
-                MineFieldBase oldField = Field.Clone();
+                var oldState = new FieldState(Field);
 
                 progress = false;
 
                 log.Combine(solverBasic.Solve());
 
-                ResetFieldData(oldField);
+                ResetFieldData(oldState);
 
                 for (int x = 0; x < width; x++)
                 {

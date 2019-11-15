@@ -8,7 +8,7 @@ namespace Minesolver
     {
         private static void Main()
         {
-            MineField field = new MineField(50, 50);
+            Field field = new Field(50, 50);
 
             SolverBasic solverBase = new SolverBasic(field);
 

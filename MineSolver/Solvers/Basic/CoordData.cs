@@ -4,12 +4,12 @@ namespace Minesolver.Solvers.Basic
 {
     public class CoordData
     {
-        public MineFieldBase Field { get; private set; }
+        public FieldBase Field { get; private set; }
         public int X { get; private set; }
         public int Y { get; private set; }
         public bool IsInitialized { get; private set; } = false;
-        public bool IsRevealed => Value != MineFieldBase.Hidden ? true : false;
-        public bool IsMine => Value == MineFieldBase.Mine ? true : false;
+        public bool IsRevealed => Value != FieldBase.Hidden ? true : false;
+        public bool IsMine => Value == FieldBase.Mine ? true : false;
         public bool IsValue => IsRevealed && !IsMine;
         public bool IsSolved { get => GetIsSolved(); set => isSolvedCache = value; }
         public int Value => Field[X, Y];
@@ -19,7 +19,7 @@ namespace Minesolver.Solvers.Basic
 
         private bool isSolvedCache;
 
-        public virtual void Initialize(int x, int y, MineFieldBase field)
+        public virtual void Initialize(int x, int y, FieldBase field)
         {
             Field = field;
             X = x;
@@ -38,7 +38,7 @@ namespace Minesolver.Solvers.Basic
 
             foreach ((int X, int Y) coord in Neighbors)
             {
-                if (Field[coord] == MineFieldBase.Hidden)
+                if (Field[coord] == FieldBase.Hidden)
                 {
                     return false;
                 }
@@ -55,7 +55,7 @@ namespace Minesolver.Solvers.Basic
 
             foreach ((int X, int Y) coord in Neighbors)
             {
-                if (Field[coord] == MineFieldBase.Mine)
+                if (Field[coord] == FieldBase.Mine)
                 {
                     nMines++;
                 }
@@ -70,7 +70,7 @@ namespace Minesolver.Solvers.Basic
 
             foreach ((int X, int Y) coord in Neighbors)
             {
-                if (Field[coord] == MineFieldBase.Hidden)
+                if (Field[coord] == FieldBase.Hidden)
                 {
                     nHidden++;
                 }

@@ -10,7 +10,7 @@ namespace Minesolver.Solvers
         private readonly SolverAdvanced solverAdvanced;
         public double testVal = 0;
 
-        public SolverAdvancedGuesser(MineFieldBase field) : base(field)
+        public SolverAdvancedGuesser(FieldBase field) : base(field)
         {
             solverAdvanced = new SolverAdvanced(field);
         }
@@ -21,11 +21,11 @@ namespace Minesolver.Solvers
 
             while (fieldData.IsSolved == false)
             {
-                MineFieldBase oldField = Field.Clone();
+                var oldState = new FieldState(Field);
 
                 log.Combine(solverAdvanced.Solve());
 
-                ResetFieldData(oldField);
+                ResetFieldData(oldState);
 
                 for (int x = 0; x < width; x++)
                 {

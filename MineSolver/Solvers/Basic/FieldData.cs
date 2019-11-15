@@ -6,11 +6,11 @@
         public int Height => field.Height;
         public bool IsSolved => IsSolvedFunc();
 
-        private readonly MineFieldBase field;
+        private readonly FieldBase field;
 
         private readonly TCoordInfo[,] coordsData;
 
-        public FieldData(MineFieldBase field)
+        public FieldData(FieldBase field)
         {
             this.field = field;
             coordsData = new TCoordInfo[Width, Height];

@@ -6,7 +6,7 @@ namespace Minesolver.Solvers
 {
     public abstract class SolverBase<TCoordData> where TCoordData : CoordData, new()
     {
-        public MineFieldBase Field { get; }
+        public FieldBase Field { get; }
         public bool HasLost { get; protected set; } = false;
 
         protected readonly FieldData<TCoordData> fieldData;
@@ -14,7 +14,7 @@ namespace Minesolver.Solvers
         protected readonly int width;
         protected readonly int height;
 
-        public SolverBase(MineFieldBase field)
+        public SolverBase(FieldBase field)
         {
             fieldData = new FieldData<TCoordData>(field);
             Field = field;

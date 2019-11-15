@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Minesolver
 {
-    public abstract class MineFieldBase : IClonable<MineFieldBase>, IEquatable<MineFieldBase>
+    public abstract class FieldBase
     {
         public event CoordFunc OnLoss;
         public event CoordFunc OnFlag;
@@ -20,7 +20,7 @@ namespace Minesolver
         public const int Mine = -1;
         public const int Hidden = -2;
 
-        protected MineFieldBase(int width, int height)
+        protected FieldBase(int width, int height)
         {
             Width = width;
             Height = height;
@@ -80,52 +80,9 @@ namespace Minesolver
             }
 
             return neighbors;
-        }
+        }        
 
-        public abstract MineFieldBase Clone();
-
-        public bool Equals(MineFieldBase other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            if (Width != other.Width || Height != other.Height)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    if(this[x,y] != other[x,y])
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as MineFieldBase);
-        }
-
-        public override int GetHashCode()
-        {
-            return ToString().GetHashCode() + Width * 7 + Height * 13;
-        }
-
-        public override string ToString()
+        public string StateToString()
         {
             StringBuilder strBuilder = new StringBuilder(Width * Height + 2 * Height);
 

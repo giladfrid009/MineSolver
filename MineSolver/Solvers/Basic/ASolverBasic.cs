@@ -6,7 +6,7 @@ namespace Minesolver.Solvers.Basic
 {
     public abstract class SolverBasicBase : SolverBase<CoordData>
     {        
-        public SolverBasicBase(MineFieldBase field) : base(field)
+        public SolverBasicBase(FieldBase field) : base(field)
         {
             
         }

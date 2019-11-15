@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace Minesolver
 {
-    public class MineField : MineFieldBase
+    public class Field : FieldBase
     {
         private static readonly Random staticRnd = new Random();
 
         private readonly int[,] fieldSolved;
         private readonly int[,] fieldUnsolved;
 
-        public MineField(int width, int height) : base(width, height)
+        public Field(int width, int height) : base(width, height)
         {
             fieldSolved = new int[Width, Height];
             fieldUnsolved = new int[Width, Height];
@@ -169,9 +169,9 @@ namespace Minesolver
             }
         }
 
-        public override MineFieldBase Clone()
+        public override FieldBase Clone()
         {
-            MineField copy = new MineField(Width, Height);
+            Field copy = new Field(Width, Height);
 
             Array.Copy(fieldSolved, 0, copy.fieldSolved, 0, fieldSolved.LongLength);
             Array.Copy(fieldUnsolved, 0, copy.fieldUnsolved, 0, fieldUnsolved.LongLength);

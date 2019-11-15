@@ -4,7 +4,7 @@ namespace Minesolver
 {
     public static class OnlineGraphics
     {
-        public static void Subscibe(MineFieldBase field)
+        public static void Subscibe(FieldBase field)
         {
             Console.WindowWidth = Console.LargestWindowWidth;
             Console.WindowHeight = Console.LargestWindowHeight;
@@ -16,7 +16,7 @@ namespace Minesolver
             field.OnLoss += PrintLoss;
         }
 
-        public static void Unsubscibe(MineFieldBase field)
+        public static void Unsubscibe(FieldBase field)
         {
             field.OnFlag -= PrintMine;
             field.OnUnflag -= PrintHidden;

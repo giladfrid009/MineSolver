@@ -5,7 +5,7 @@ namespace Minesolver.Solvers
 {
     public class SolverBasicRecursive : SolverBasicBase
     {
-        public SolverBasicRecursive(MineFieldBase field) : base(field)
+        public SolverBasicRecursive(FieldBase field) : base(field)
         {
 
         }

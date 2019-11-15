@@ -30,7 +30,8 @@ namespace Minesolver.Solvers.Advanced
 
         public bool this[int index] => vals[index];
 
-        public void Apply<TCoordData>(MineFieldBase field, FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced, new()
+        // todo: apply only to fieldData and analyze only fieldData
+        public void Apply<TCoordData>(FieldBase field, FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced, new()
         {
             if (coords.Count != Length)
             {
@@ -50,7 +51,7 @@ namespace Minesolver.Solvers.Advanced
             }
         }
 
-        public void Remove<TCoordData>(MineFieldBase field, FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced, new()
+        public void Remove<TCoordData>(FieldBase field, FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced, new()
         {
             if (coords.Count != Length)
             {

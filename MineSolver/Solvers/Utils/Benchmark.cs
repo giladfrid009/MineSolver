@@ -10,7 +10,7 @@ namespace Minesolver.Solvers.Utils
 
         private static void CheckCompatibility<TCoordData>(SolverBase<TCoordData> solver) where TCoordData : CoordData, new()
         {
-            if (solver.Field is MineField == false)
+            if (solver.Field is Field == false)
             {
                 throw new Exception("Field class isn't compatible with this function");
             }
@@ -27,7 +27,7 @@ namespace Minesolver.Solvers.Utils
 
             Random rnd = seed != null ? new Random(seed.Value) : new Random();
             Stopwatch stopwatch = new Stopwatch();
-            MineField field = (MineField)solver.Field;
+            Field field = (Field)solver.Field;
 
             int xMid = field.Width / 2;
             int yMid = field.Height / 2;
@@ -49,7 +49,7 @@ namespace Minesolver.Solvers.Utils
             CheckCompatibility(solver);
 
             Random rnd = seed != null ? new Random(seed.Value) : new Random();
-            MineField field = (MineField)solver.Field;
+            Field field = (Field)solver.Field;
 
             int width = field.Width;
             int height = field.Height;
@@ -69,7 +69,7 @@ namespace Minesolver.Solvers.Utils
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (field[x, y] == MineFieldBase.Hidden)
+                        if (field[x, y] == FieldBase.Hidden)
                         {
                             totalHidden++;
                         }
@@ -90,7 +90,7 @@ namespace Minesolver.Solvers.Utils
             CheckCompatibility(solver);
 
             Random rnd = seed != null ? new Random(seed.Value) : new Random();
-            MineField field = (MineField)solver.Field;
+            Field field = (Field)solver.Field;
 
             int xMid = field.Width / 2;
             int yMid = field.Height / 2;

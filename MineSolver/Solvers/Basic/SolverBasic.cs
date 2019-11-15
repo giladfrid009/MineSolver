@@ -5,7 +5,7 @@ namespace Minesolver.Solvers
 {
     public class SolverBasic : SolverBasicBase
     {
-        public SolverBasic(MineFieldBase field) : base(field)
+        public SolverBasic(FieldBase field) : base(field)
         {
 
         }

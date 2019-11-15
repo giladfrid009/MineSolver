@@ -7,7 +7,7 @@ namespace Minesolver.Solvers.Advanced
     {
         protected readonly ComboLibrary comboLibrary;
 
-        public SolverAdvancedBase(MineFieldBase field) : base(field)
+        public SolverAdvancedBase(FieldBase field) : base(field)
         {
             comboLibrary = new ComboLibrary();
         }
@@ -17,7 +17,7 @@ namespace Minesolver.Solvers.Advanced
             return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
         }
 
-        protected void ResetFieldData(MineFieldBase oldField)
+        protected void ResetFieldData(FieldState oldState)
         {
             HashSet<(int, int)> processed = new HashSet<(int, int)>();
 
@@ -25,7 +25,7 @@ namespace Minesolver.Solvers.Advanced
             {
                 for (int y = 0; y < height; y++)
                 {
-                    if (oldField[x, y] != Field[x, y])
+                    if (oldState[x, y] != Field[x, y])
                     {
                         ResetCoordData(x, y, processed);
                     }
