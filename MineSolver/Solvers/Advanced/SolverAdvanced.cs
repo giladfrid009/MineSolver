@@ -27,7 +27,7 @@ namespace Minesolver.Solvers
 
                 log.Combine(solverBasic.Solve());
 
-                UpdateFieldData(oldField);
+                ResetFieldData(oldField);
 
                 for (int x = 0; x < width; x++)
                 {
@@ -90,7 +90,7 @@ namespace Minesolver.Solvers
 
             foreach ((int x2, int y2) in solved)
             {
-                UpdateCoordData(x2, y2, affected);
+                ResetCoordData(x2, y2, affected);
             }
 
             foreach (var coord in hidden)
@@ -110,7 +110,7 @@ namespace Minesolver.Solvers
 
             Combo[] combos = comboLibrary[hidden.Count, nFlagsToComplete];
 
-            HashSet<(int X, int Y)> affected = new HashSet<(int X, int Y)>();
+            HashSet<(int X, int Y)> affected = new HashSet<(int, int)>();
 
             foreach ((int x2, int y2) in hidden)
             {
@@ -121,7 +121,7 @@ namespace Minesolver.Solvers
             {
                 combo.Apply(Field, fieldData, hidden);
 
-                if (affected.All(coord => IsCoordValid(coord.X, coord.Y)))
+                if (IsComboValid(affected))
                 {
                     foreach ((int X, int Y) coord in hidden)
                     {
@@ -138,7 +138,7 @@ namespace Minesolver.Solvers
             }
         }
 
-        private bool IsCoordValid(int x, int y)
+        protected override bool IsCoordValid(int x, int y)
         {
             int nMines = fieldData[x, y].NumMines;
 
@@ -146,8 +146,7 @@ namespace Minesolver.Solvers
             {
                 return false;
             }
-            // todo: do the old way that areValidCombos also try all positions
-            // that way, after trygin to solve one coord, all other coords will be calculated also. (maybe?)
+
             if (nMines < Field[x, y] && AreValidCombos(x, y) == false)
             {
                 return false;
@@ -158,9 +157,14 @@ namespace Minesolver.Solvers
 
         private bool AreValidCombos(int x, int y)
         {
-            int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
-
             List<(int X, int Y)> hidden = GetHiddenUnused(x, y);
+
+            if(hidden.Count == 0)
+            {
+                return false;
+            }
+
+            int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
 
             if (hidden.Count < nFlagsToComplete)
             {

@@ -8,7 +8,7 @@ namespace Minesolver
     {
         private static void Main()
         {
-            MineField field = new MineField(205, 65);
+            MineField field = new MineField(50, 50);
 
             SolverBasic solverBase = new SolverBasic(field);
 
@@ -16,24 +16,24 @@ namespace Minesolver
 
             SolverAdvancedGuesser solverGuesser = new SolverAdvancedGuesser(field);
 
-            OnlineGraphics.Subscibe(field);
+            //OnlineGraphics.Subscibe(field);
 
-            field.Generate(0.2, field.Width / 2, field.Height / 2, 3, 1389454863);
+            //field.Generate(0.2, field.Width / 2, field.Height / 2, 3, 1389454863);
 
-            solverAdvanced.Solve();
+            //solverAdvanced.Solve();
 
-            double testValTotal = 0;
+            //double testValTotal = 0;
 
-            int iterations = 1000;
+            //int iterations = 1000;
 
-            // todo: precentage isn't right
-            // maybe also cuz of tryAdvnced = false
+            //// todo: precentage isn't right
+            //// maybe also cuz of tryAdvnced = false
 
-            int totalUnsolved = 0;
+            //int totalUnsolved = 0;
 
             //Console.WriteLine(Benchmarks.CountUnsolved(solverAdvanced, 500, 0));
 
-            Console.WriteLine(Benchmarks.CountUnsolved(solverAdvanced, 1000, 0));
+            Console.WriteLine(Benchmarks.CountUnsolved(solverGuesser, 100, 0));
 
             //for (int i = 0; i < iterations; i++)
             //{

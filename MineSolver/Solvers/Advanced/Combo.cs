@@ -9,26 +9,26 @@ namespace Minesolver.Solvers.Advanced
         public int Length { get; }
         public int NumMines { get; }
 
-        private readonly bool[] comboVals;
+        private readonly bool[] vals;
 
-        public Combo(bool[] comboVals)
+        public Combo(bool[] vals)
         {
-            Length = comboVals.Length;
+            Length = vals.Length;
 
-            this.comboVals = new bool[Length];
+            this.vals = new bool[Length];
 
             for (int i = 0; i < Length; i++)
             {
-                this.comboVals[i] = comboVals[i];
+                this.vals[i] = vals[i];
 
-                if (this.comboVals[i])
+                if (this.vals[i])
                 {
                     NumMines++;
                 }
             }
         }
 
-        public bool this[int index] => comboVals[index];
+        public bool this[int index] => vals[index];
 
         public void Apply<TCoordData>(MineFieldBase field, FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced, new()
         {
@@ -43,7 +43,7 @@ namespace Minesolver.Solvers.Advanced
 
                 fieldData[x, y].UsedInCombo = true;
 
-                if (comboVals[i])
+                if (vals[i])
                 {
                     field.Flag(x, y);
                 }
@@ -63,7 +63,7 @@ namespace Minesolver.Solvers.Advanced
 
                 fieldData[x, y].UsedInCombo = false;
 
-                if (comboVals[i])
+                if (vals[i])
                 {
                     field.Unflag(x, y);
                 }

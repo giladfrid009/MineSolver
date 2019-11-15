@@ -25,7 +25,7 @@ namespace Minesolver.Solvers
 
                 log.Combine(solverAdvanced.Solve());
 
-                UpdateFieldData(oldField);
+                ResetFieldData(oldField);
 
                 for (int x = 0; x < width; x++)
                 {
@@ -55,7 +55,7 @@ namespace Minesolver.Solvers
                     break;
                 }
 
-                UpdateCoordData(xMin, yMin, new HashSet<(int, int)>());             
+                ResetCoordData(xMin, yMin, new HashSet<(int, int)>());             
             }
 
             return log.Clone();
@@ -63,20 +63,30 @@ namespace Minesolver.Solvers
 
         private bool CalcTotals(int x, int y)
         {
-            bool result = false;
-
             if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
             {
-                return result;
+                return false;
+            }
+
+            List<(int X, int Y)> hidden = GetHiddenUnused(x, y);
+
+            if (hidden.Count == 0)
+            { 
+                return false;
             }
 
             int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
 
-            List<(int X, int Y)> hidden = GetHiddenUnused(x, y);
-
             if (hidden.Count < nFlagsToComplete)
             {
-                return result;
+                return false;
+            }
+
+            if(nFlagsToComplete == 0)
+            {
+                // todo: infinite loop happens if we wont return here (not always)
+                // if we return here then the alg is worse.
+                //return true; we shouldn't return here.
             }
 
             Combo[] combos = comboLibrary[hidden.Count, nFlagsToComplete];
@@ -88,11 +98,13 @@ namespace Minesolver.Solvers
                 affected.UnionWith(GetValues(x2, y2));
             }
 
+            bool result = false;
+            
             foreach (Combo combo in combos)
             {
                 combo.Apply(Field, fieldData, hidden);
 
-                if (affected.All(coord => IsCoordValid(coord.X, coord.Y)))
+                if (IsComboValid(affected))
                 {
                     result = true;
 
@@ -108,12 +120,12 @@ namespace Minesolver.Solvers
                 }
 
                 combo.Remove(Field, fieldData, hidden);
-            }
+            }           
 
             return result;
         }
 
-        private bool IsCoordValid(int x, int y)
+        protected override bool IsCoordValid(int x, int y)
         {
             int nMines = fieldData[x, y].NumMines;
 
@@ -125,6 +137,12 @@ namespace Minesolver.Solvers
             if (nMines < Field[x, y] && CalcTotals(x, y) == false)
             {
                 return false;
+            }
+
+            if (nMines == Field[x, y])
+            {
+                // todo: possibly leads to infinite loops. somehow.
+                CalcTotals(x, y);
             }
 
             return true;
@@ -149,7 +167,6 @@ namespace Minesolver.Solvers
 
                     if (precent == 0)
                     {
-                        Console.SetCursorPosition(x, y);                     
                         throw new Exception();
                     }
 

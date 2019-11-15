@@ -34,11 +34,7 @@ namespace Minesolver.Solvers.Utils
 
             for (int i = 0; i < iterations; i++)
             {
-                int localSeed = rnd.Next();
-
-                PrintLog(i, localSeed);
-
-                field.Generate(0.2, xMid, yMid, 3, localSeed);
+                field.Generate(0.2, xMid, yMid, 3, rnd.Next());
 
                 stopwatch.Start();
                 solver.Solve();
@@ -65,11 +61,7 @@ namespace Minesolver.Solvers.Utils
 
             for (int i = 0; i < iterations; i++)
             {
-                int localSeed = rnd.Next();
-
-                PrintLog(i, localSeed);
-
-                field.Generate(0.2, xMid, yMid, 3, localSeed);
+                field.Generate(0.2, xMid, yMid, 3, rnd.Next());
 
                 solver.Solve();
 
@@ -83,6 +75,11 @@ namespace Minesolver.Solvers.Utils
                         }
                     }
                 }
+
+                // todo: remove later
+                Console.Write('.');
+                if (i == 10)
+                    OnlineGraphics.Subscibe(field);
             }
 
             return totalHidden;

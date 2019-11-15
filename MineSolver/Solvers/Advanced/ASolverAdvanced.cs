@@ -17,9 +17,9 @@ namespace Minesolver.Solvers.Advanced
             return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
         }
 
-        protected void UpdateFieldData(MineFieldBase oldField)
+        protected void ResetFieldData(MineFieldBase oldField)
         {
-            HashSet<(int, int)> affected = new HashSet<(int, int)>();
+            HashSet<(int, int)> processed = new HashSet<(int, int)>();
 
             for (int x = 0; x < width; x++)
             {
@@ -27,35 +27,35 @@ namespace Minesolver.Solvers.Advanced
                 {
                     if (oldField[x, y] != Field[x, y])
                     {
-                        UpdateCoordData(x, y, affected);
+                        ResetCoordData(x, y, processed);
                     }
                 }
             }
         }
 
-        protected void UpdateCoordData(int x, int y, HashSet<(int, int)> affected)
+        protected void ResetCoordData(int x, int y, HashSet<(int, int)> processed)
         {
-            if (fieldData[x, y].IsValue)
+            if (fieldData[x, y].IsValue && fieldData[x, y].IsSolved == false)
             {
-                UpdateCoordRecursive(x, y, affected);
+                ResetCoordRecursive(x, y, processed);
             }
             else
             {
                 foreach ((int x2, int y2) in GetUnsolved(x, y))
                 {
-                    UpdateCoordRecursive(x2, y2, affected);
+                    ResetCoordRecursive(x2, y2, processed);
                 }
             }
         }
 
-        private void UpdateCoordRecursive(int x, int y, HashSet<(int X, int Y)> coords)
+        private void ResetCoordRecursive(int x, int y, HashSet<(int X, int Y)> processed)
         {
-            if (coords.Contains((x, y)))
+            if (processed.Contains((x, y)))
             {
                 return;
             }
 
-            coords.Add((x, y));
+            processed.Add((x, y));
 
             fieldData[x, y].TryAdvanced = true;
             fieldData[x, y].TotalFlagged = 0;
@@ -63,22 +63,35 @@ namespace Minesolver.Solvers.Advanced
 
             foreach ((int x2, int y2) in GetUnsolved(x, y))
             {
-                UpdateCoordRecursive(x2, y2, coords);
+                ResetCoordRecursive(x2, y2, processed);
             }
 
             foreach ((int x2, int y2) in GetHidden(x, y))
             {
-                if (coords.Contains((x2, y2)))
+                if (processed.Contains((x2, y2)))
                     continue;
 
-                coords.Add((x2, y2));
+                processed.Add((x2, y2));
 
                 foreach ((int x3, int y3) in GetUnsolved(x2, y2))
                 {
-                    UpdateCoordRecursive(x3, y3, coords);
+                    ResetCoordRecursive(x3, y3, processed);
                 }
             }
         }
+
+        protected bool IsComboValid(HashSet<(int X, int Y)> affected)
+        {
+            foreach (var (x, y) in affected)
+            {
+                if (IsCoordValid(x, y) == false)
+                    return false;
+            }
+
+            return true;
+        }
+
+        protected abstract bool IsCoordValid(int x, int y);
 
         protected override void Reset()
         {
