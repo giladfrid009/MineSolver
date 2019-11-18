@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Minesolver.Solvers.Basic;
+using System.Collections.Generic;
 using System.Linq;
-using Minesolver.Solvers.Basic;
 
 namespace Minesolver.Solvers
 {
@@ -39,9 +39,14 @@ namespace Minesolver.Solvers
 
         protected List<(int X, int Y)> GetUnsolved(int x, int y)
         {
-            return GetValues(x, y).Where(coord => fieldData[coord].IsSolved == false).ToList();
+            return GetValues(x, y).Where(coord => fieldData.IsSolved(coord.X, coord.Y) == false).ToList();
         }
 
-        protected abstract void Reset();
+        protected virtual void Reset()
+        {
+            log.Clear();
+
+            HasLost = false;           
+        }
     }
 }

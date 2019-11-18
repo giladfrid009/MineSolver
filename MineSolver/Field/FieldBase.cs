@@ -26,7 +26,6 @@ namespace Minesolver
             Height = height;
         }
 
-
         public abstract int this[int x, int y] { get; }
 
         public int this[(int x, int y) coord] => this[coord.x, coord.y];
@@ -80,7 +79,7 @@ namespace Minesolver
             }
 
             return neighbors;
-        }        
+        }
 
         public string StateToString()
         {

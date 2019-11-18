@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Minesolver.Solvers.Advanced;
+using System.Collections.Generic;
 using System.Linq;
-using Minesolver.Solvers.Advanced;
 
 namespace Minesolver.Solvers
 {
@@ -21,13 +21,13 @@ namespace Minesolver.Solvers
 
             while (true)
             {
-                var oldState = new FieldState(Field);
+                FieldState oldState = new FieldState(Field);
 
                 progress = false;
 
                 log.Combine(solverBasic.Solve());
 
-                ResetFieldData(oldState);
+                ResetFieldChanges(oldState);
 
                 for (int x = 0; x < width; x++)
                 {
@@ -60,7 +60,7 @@ namespace Minesolver.Solvers
 
             fieldData[x, y].TryAdvanced = false;
 
-            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
+            if (fieldData.IsSolved(x, y) || (fieldData[x, y].IsValue == false))
             {
                 return false;
             }
@@ -84,6 +84,9 @@ namespace Minesolver.Solvers
                     log.AddMove(x2, y2, Move.Flag);
                     solved.Add((x2, y2));
                 }
+
+                if (HasLost)
+                    throw new System.Exception();
             }
 
             var affected = new HashSet<(int, int)>();
@@ -95,20 +98,19 @@ namespace Minesolver.Solvers
 
             foreach (var coord in hidden)
             {
-                fieldData[coord].TotalCombos = 0;
-                fieldData[coord].TotalFlagged = 0;
-            }       
+                fieldData[coord].Reset();                
+            }
 
             return solved.Count > 0;
         }
 
         private void CalcTotals(int x, int y)
         {
-            int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
+            int nFlagsMissing = Field[x, y] - fieldData.NumMines(x, y);
 
-            List<(int X, int Y)> hidden = GetHiddenUnused(x, y);
+            var hidden = GetHidden(x, y);
 
-            Combo[] combos = comboLibrary[hidden.Count, nFlagsToComplete];
+            Combo[] combos = comboLibrary[hidden.Count, nFlagsMissing];
 
             HashSet<(int X, int Y)> affected = new HashSet<(int, int)>();
 
@@ -119,7 +121,7 @@ namespace Minesolver.Solvers
 
             foreach (Combo combo in combos)
             {
-                combo.Apply(Field, fieldData, hidden);
+                combo.Apply(fieldData, hidden);
 
                 if (IsComboValid(affected))
                 {
@@ -127,20 +129,20 @@ namespace Minesolver.Solvers
                     {
                         fieldData[coord].TotalCombos++;
 
-                        if (fieldData[coord].IsMine)
+                        if (fieldData[coord].IsFlagged)
                         {
                             fieldData[coord].TotalFlagged++;
                         }
                     }
                 }
 
-                combo.Remove(Field, fieldData, hidden);
+                combo.Remove(fieldData, hidden);
             }
         }
 
         protected override bool IsCoordValid(int x, int y)
         {
-            int nMines = fieldData[x, y].NumMines;
+            int nMines = fieldData.NumMines(x, y);
 
             if (nMines > Field[x, y])
             {
@@ -157,16 +159,16 @@ namespace Minesolver.Solvers
 
         private bool AreValidCombos(int x, int y)
         {
-            List<(int X, int Y)> hidden = GetHiddenUnused(x, y);
+            var hidden = GetNotForced(GetHidden(x, y));
 
-            if(hidden.Count == 0)
+            if (hidden.Count == 0)
             {
                 return false;
             }
 
-            int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
+            int nFlagsMissing = Field[x, y] - fieldData.NumMines(x, y);
 
-            if (hidden.Count < nFlagsToComplete)
+            if (hidden.Count < nFlagsMissing)
             {
                 return false;
             }
@@ -178,19 +180,19 @@ namespace Minesolver.Solvers
                 affected.UnionWith(GetValues(x2, y2));
             }
 
-            Combo[] combos = comboLibrary[hidden.Count, nFlagsToComplete];
+            Combo[] combos = comboLibrary[hidden.Count, nFlagsMissing];
 
             foreach (Combo combo in combos)
             {
-                combo.Apply(Field, fieldData, hidden);
+                combo.Apply(fieldData, hidden);
 
                 if (affected.All(coord => IsCoordValid(coord.X, coord.Y)))
                 {
-                    combo.Remove(Field, fieldData, hidden);
+                    combo.Remove(fieldData, hidden);
                     return true;
                 }
 
-                combo.Remove(Field, fieldData, hidden);
+                combo.Remove(fieldData, hidden);
             }
 
             return false;

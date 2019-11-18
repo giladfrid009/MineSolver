@@ -5,10 +5,10 @@ using System.Linq;
 namespace Minesolver.Solvers.Basic
 {
     public abstract class SolverBasicBase : SolverBase<CoordData>
-    {        
+    {
         public SolverBasicBase(FieldBase field) : base(field)
         {
-            
+
         }
 
         protected HashSet<(int X, int Y)> RevealHidden(int x, int y)
@@ -77,7 +77,7 @@ namespace Minesolver.Solvers.Basic
 
             GetOpenedAreaRecursive(x, y, area);
 
-            return area.Where(coord => Field[coord] != 0 && fieldData[coord].IsSolved == false).ToList();
+            return area.Where(coord => Field[coord] != 0 && fieldData.IsSolved(coord.X, coord.Y) == false).ToList();
         }
 
         private void GetOpenedAreaRecursive(int x, int y, HashSet<(int, int)> area)
@@ -94,21 +94,6 @@ namespace Minesolver.Solvers.Basic
                 foreach ((int x2, int y2) in fieldData[x, y].Neighbors)
                 {
                     GetOpenedAreaRecursive(x2, y2, area);
-                }
-            }
-        }
-
-        protected override void Reset()
-        {
-            log.Clear();
-
-            HasLost = false;
-
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    fieldData[x, y].IsSolved = false;
                 }
             }
         }

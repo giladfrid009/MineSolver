@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Minesolver.Solvers.Basic;
+﻿using Minesolver.Solvers.Basic;
+using System.Collections.Generic;
 
 namespace Minesolver.Solvers
 {
@@ -39,13 +39,13 @@ namespace Minesolver.Solvers
 
         private HashSet<(int X, int Y)> SolveCoord(int x, int y)
         {
-            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
+            if (fieldData.IsSolved(x, y) || (fieldData[x, y].IsValue == false))
             {
                 return new HashSet<(int, int)>();
             }
 
-            int nHidden = fieldData[x, y].NumHidden;
-            int nMines = fieldData[x, y].NumMines;
+            int nHidden = fieldData.NumHidden(x, y);
+            int nMines = fieldData.NumMines(x, y);
 
             if (Field[x, y] == nMines)
             {

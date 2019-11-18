@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using Minesolver.Solvers.Advanced;
 using System;
-using Minesolver.Solvers.Advanced;
+using System.Collections.Generic;
 
 namespace Minesolver.Solvers
 {
@@ -19,20 +18,22 @@ namespace Minesolver.Solvers
         {
             Reset();
 
-            while (fieldData.IsSolved == false)
+            while (fieldData.IsFieldSolved == false)
             {
-                var oldState = new FieldState(Field);
+                FieldState oldState = new FieldState(Field);
 
                 log.Combine(solverAdvanced.Solve());
 
-                ResetFieldData(oldState);
+                ResetFieldChanges(oldState);
 
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
                     {
                         if (fieldData[x, y].TryAdvanced == false)
+                        {
                             continue;
+                        }
 
                         CalcTotals(x, y);
 
@@ -40,9 +41,9 @@ namespace Minesolver.Solvers
                     }
                 }
 
-                var (xMin, yMin) = FindMinimum();
+                (int xMin, int yMin) = FindMinimum();
 
-                if(xMin == -1)
+                if (xMin == -1)
                 {
                     break;
                 }
@@ -55,7 +56,7 @@ namespace Minesolver.Solvers
                     break;
                 }
 
-                ResetCoordData(xMin, yMin, new HashSet<(int, int)>());             
+                ResetCoordData(xMin, yMin, new HashSet<(int, int)>());
             }
 
             return log.Clone();
@@ -63,33 +64,26 @@ namespace Minesolver.Solvers
 
         private bool CalcTotals(int x, int y)
         {
-            if (fieldData[x, y].IsSolved || (fieldData[x, y].IsValue == false))
+            if (fieldData.IsSolved(x, y) || (fieldData[x, y].IsValue == false))
             {
                 return false;
             }
 
-            List<(int X, int Y)> hidden = GetHiddenUnused(x, y);
+            List<(int X, int Y)> hidden = GetNotForced(GetHidden(x, y));
 
             if (hidden.Count == 0)
-            { 
-                return false;
-            }
-
-            int nFlagsToComplete = Field[x, y] - fieldData[x, y].NumMines;
-
-            if (hidden.Count < nFlagsToComplete)
             {
                 return false;
             }
 
-            if(nFlagsToComplete == 0)
+            int nFlagsMissing = Field[x, y] - fieldData.NumMines(x, y);
+
+            if (hidden.Count < nFlagsMissing)
             {
-                // todo: infinite loop happens if we wont return here (not always)
-                // if we return here then the alg is worse.
-                //return true; we shouldn't return here.
+                return false;
             }
 
-            Combo[] combos = comboLibrary[hidden.Count, nFlagsToComplete];
+            Combo[] combos = comboLibrary[hidden.Count, nFlagsMissing];
 
             HashSet<(int X, int Y)> affected = new HashSet<(int X, int Y)>();
 
@@ -99,10 +93,10 @@ namespace Minesolver.Solvers
             }
 
             bool result = false;
-            
+
             foreach (Combo combo in combos)
             {
-                combo.Apply(Field, fieldData, hidden);
+                combo.Apply(fieldData, hidden);
 
                 if (IsComboValid(affected))
                 {
@@ -112,22 +106,22 @@ namespace Minesolver.Solvers
                     {
                         fieldData[coord].TotalCombos++;
 
-                        if (fieldData[coord].IsMine)
+                        if (fieldData[coord].IsFlagged)
                         {
                             fieldData[coord].TotalFlagged++;
                         }
                     }
                 }
 
-                combo.Remove(Field, fieldData, hidden);
-            }           
+                combo.Remove(fieldData, hidden);
+            }
 
             return result;
         }
 
         protected override bool IsCoordValid(int x, int y)
         {
-            int nMines = fieldData[x, y].NumMines;
+            int nMines = fieldData.NumMines(x, y);
 
             if (nMines > Field[x, y])
             {
@@ -141,7 +135,6 @@ namespace Minesolver.Solvers
 
             if (nMines == Field[x, y])
             {
-                // todo: possibly leads to infinite loops. somehow.
                 CalcTotals(x, y);
             }
 
@@ -178,7 +171,7 @@ namespace Minesolver.Solvers
                 }
             }
 
-            return minCoord;           
+            return minCoord;
         }
     }
 }

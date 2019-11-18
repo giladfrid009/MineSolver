@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Minesolver.Solvers.Basic;
+using System;
 using System.Collections.Generic;
-using Minesolver.Solvers.Basic;
+using System.Diagnostics;
 
 namespace Minesolver.Solvers.Advanced
 {
@@ -30,8 +31,7 @@ namespace Minesolver.Solvers.Advanced
 
         public bool this[int index] => vals[index];
 
-        // todo: apply only to fieldData and analyze only fieldData
-        public void Apply<TCoordData>(FieldBase field, FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced, new()
+        public void Apply<TCoordData>(FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced, new()
         {
             if (coords.Count != Length)
             {
@@ -42,16 +42,18 @@ namespace Minesolver.Solvers.Advanced
             {
                 (int x, int y) = coords[i];
 
-                fieldData[x, y].UsedInCombo = true;
-
                 if (vals[i])
                 {
-                    field.Flag(x, y);
+                    fieldData[x, y].ForceFlag = true;
+                }
+                else
+                {
+                    fieldData[x, y].ForceReveal = true;
                 }
             }
         }
 
-        public void Remove<TCoordData>(FieldBase field, FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced, new()
+        public void Remove<TCoordData>(FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced, new()
         {
             if (coords.Count != Length)
             {
@@ -62,12 +64,8 @@ namespace Minesolver.Solvers.Advanced
             {
                 (int x, int y) = coords[i];
 
-                fieldData[x, y].UsedInCombo = false;
-
-                if (vals[i])
-                {
-                    field.Unflag(x, y);
-                }
+                fieldData[x, y].ForceFlag = false;
+                fieldData[x, y].ForceReveal = false;
             }
         }
     }

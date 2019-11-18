@@ -168,15 +168,5 @@ namespace Minesolver
                 }
             }
         }
-
-        public override FieldBase Clone()
-        {
-            Field copy = new Field(Width, Height);
-
-            Array.Copy(fieldSolved, 0, copy.fieldSolved, 0, fieldSolved.LongLength);
-            Array.Copy(fieldUnsolved, 0, copy.fieldUnsolved, 0, fieldUnsolved.LongLength);
-
-            return copy;
-        }
     }
 }

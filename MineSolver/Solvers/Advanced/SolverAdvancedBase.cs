@@ -12,12 +12,12 @@ namespace Minesolver.Solvers.Advanced
             comboLibrary = new ComboLibrary();
         }
 
-        protected List<(int X, int Y)> GetHiddenUnused(int x, int y)
+        protected List<(int X, int Y)> GetNotForced(List<(int X, int Y)> coords)
         {
-            return GetHidden(x, y).Where(coord => fieldData[coord].UsedInCombo == false).ToList();
+            return coords.Where(coord => fieldData[coord].IsForced == false).ToList();
         }
 
-        protected void ResetFieldData(FieldState oldState)
+        protected void ResetFieldChanges(FieldState oldState)
         {
             HashSet<(int, int)> processed = new HashSet<(int, int)>();
 
@@ -35,7 +35,7 @@ namespace Minesolver.Solvers.Advanced
 
         protected void ResetCoordData(int x, int y, HashSet<(int, int)> processed)
         {
-            if (fieldData[x, y].IsValue && fieldData[x, y].IsSolved == false)
+            if (fieldData[x, y].IsValue && fieldData.IsSolved(x, y) == false)
             {
                 ResetCoordRecursive(x, y, processed);
             }
@@ -57,9 +57,7 @@ namespace Minesolver.Solvers.Advanced
 
             processed.Add((x, y));
 
-            fieldData[x, y].TryAdvanced = true;
-            fieldData[x, y].TotalFlagged = 0;
-            fieldData[x, y].TotalCombos = 0;
+            fieldData[x, y].Reset();
 
             foreach ((int x2, int y2) in GetUnsolved(x, y))
             {
@@ -69,7 +67,9 @@ namespace Minesolver.Solvers.Advanced
             foreach ((int x2, int y2) in GetHidden(x, y))
             {
                 if (processed.Contains((x2, y2)))
+                {
                     continue;
+                }
 
                 processed.Add((x2, y2));
 
@@ -82,10 +82,12 @@ namespace Minesolver.Solvers.Advanced
 
         protected bool IsComboValid(HashSet<(int X, int Y)> affected)
         {
-            foreach (var (x, y) in affected)
+            foreach ((int x, int y) in affected)
             {
                 if (IsCoordValid(x, y) == false)
+                {
                     return false;
+                }
             }
 
             return true;
@@ -95,18 +97,13 @@ namespace Minesolver.Solvers.Advanced
 
         protected override void Reset()
         {
-            log.Clear();
-
-            HasLost = false;
+            base.Reset();
 
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    fieldData[x, y].IsSolved = false;
-                    fieldData[x, y].TryAdvanced = true;
-                    fieldData[x, y].TotalFlagged = 0;
-                    fieldData[x, y].TotalCombos = 0;
+                    fieldData[x, y].Reset();
                 }
             }
         }

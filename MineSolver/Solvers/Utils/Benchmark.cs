@@ -1,7 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿using Minesolver.Solvers.Basic;
+using System;
 using System.Collections.Generic;
-using Minesolver.Solvers.Basic;
+using System.Diagnostics;
 
 namespace Minesolver.Solvers.Utils
 {
@@ -74,12 +74,7 @@ namespace Minesolver.Solvers.Utils
                             totalHidden++;
                         }
                     }
-                }
-
-                // todo: remove later
-                Console.Write('.');
-                if (i == 10)
-                    OnlineGraphics.Subscibe(field);
+                }                
             }
 
             return totalHidden;

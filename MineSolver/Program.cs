@@ -33,7 +33,7 @@ namespace Minesolver
 
             //Console.WriteLine(Benchmarks.CountUnsolved(solverAdvanced, 500, 0));
 
-            Console.WriteLine(Benchmarks.CountUnsolved(solverGuesser, 100, 0));
+            Console.WriteLine(Benchmarks.CountUnsolved(solverGuesser, 11, 0));
 
             //for (int i = 0; i < iterations; i++)
             //{

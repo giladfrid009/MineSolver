@@ -1,6 +1,5 @@
 ﻿namespace Minesolver.Solvers.Advanced
 {
-
     public class FieldState
     {
         private readonly int[,] fieldState;
