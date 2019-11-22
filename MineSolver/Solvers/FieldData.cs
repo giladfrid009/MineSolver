@@ -1,4 +1,6 @@
-﻿namespace Minesolver.Solvers
+﻿using System;
+
+namespace Minesolver.Solvers
 {
     public class FieldData<TCoordData> where TCoordData : CoordData, new()
     {

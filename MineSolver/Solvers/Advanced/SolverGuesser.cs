@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace Minesolver.Solvers
 {
-    internal class SolverAdvancedGuesser : SolverAdvancedBase
+    internal class SolverGuesser : SolverAdvancedBase
     {
         private readonly SolverAdvanced solverAdvanced;
         public double testVal = 0;
 
-        public SolverAdvancedGuesser(FieldBase field) : base(field)
+        public SolverGuesser(FieldBase field) : base(field)
         {
             solverAdvanced = new SolverAdvanced(field);
         }

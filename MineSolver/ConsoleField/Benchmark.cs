@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using Minesolver.Solvers;
 
-namespace Minesolver.ConsoleField
+namespace Minesolver.ConsoleField.Benchmark
 {
     public static class Benchmarks
     {
@@ -41,7 +41,7 @@ namespace Minesolver.ConsoleField
             return stopwatch.Elapsed;
         }
 
-        public static int CountUnsolved<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver, int iterations, int? seed = null, Action onIter = null)
+        public static int CountUnsolved<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver, int iterations, int? seed = null, Action? onIter = null)
             where TCoordData : CoordData, new()
             where TFieldData : FieldData<TCoordData>, new()
         {

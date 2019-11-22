@@ -1,6 +1,7 @@
 ﻿using Minesolver.ConsoleField;
 using Minesolver.Solvers;
 using System;
+using Minesolver.ConsoleField.Benchmark;
 
 namespace Minesolver
 {
@@ -10,7 +11,7 @@ namespace Minesolver
         {
             CField field = new CField(50, 50);
 
-            SolverAdvancedGuesser solverGuesser = new SolverAdvancedGuesser(field);
+            SolverGuesser solverGuesser = new SolverGuesser(field);
 
             OnlineGraphics.Subscibe(field);
 
@@ -18,7 +19,7 @@ namespace Minesolver
 
             //Console.WriteLine(Benchmarks.MeasureTime(solverGuesser, 100, 0));
 
-            Console.ReadKey();
+            Console.ReadKey();           
         }
 
     }

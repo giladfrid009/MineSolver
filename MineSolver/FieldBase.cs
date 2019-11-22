@@ -6,10 +6,10 @@ namespace Minesolver
 {
     public abstract class FieldBase
     {
-        public event CoordFunc OnLoss;
-        public event CoordFunc OnFlag;
-        public event CoordFunc OnUnflag;
-        public event CoordValueFunc OnReveal;
+        public event CoordFunc? OnLoss;
+        public event CoordFunc? OnFlag;
+        public event CoordFunc? OnUnflag;
+        public event CoordValueFunc? OnReveal;
 
         public delegate void CoordFunc(int x, int y);
         public delegate void CoordValueFunc(int x, int y, int val);
