@@ -1,6 +1,4 @@
-﻿using Minesolver.Solvers.Basic;
-
-namespace Minesolver.Solvers.Advanced
+﻿namespace Minesolver.Solvers.Advanced
 {
     public class CoordDataAdvanced : CoordData
     {
@@ -11,9 +9,6 @@ namespace Minesolver.Solvers.Advanced
         public uint TotalCombos = 0;
 
         public bool IsForced => ForceFlag || ForceReveal;
-        public override bool IsFlagged => ForceFlag || base.IsFlagged;
-        public override bool IsRevealed => ForceReveal || base.IsRevealed;
-        public override bool IsValue => !ForceReveal && base.IsValue;
 
         public virtual void Reset()
         {

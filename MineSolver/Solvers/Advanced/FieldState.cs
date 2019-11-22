@@ -4,7 +4,7 @@
     {
         private readonly int[,] fieldState;
 
-        public int this[int x, int y] { get => fieldState[x, y]; }
+        public int this[int x, int y] => fieldState[x, y];
 
         public FieldState(FieldBase field)
         {

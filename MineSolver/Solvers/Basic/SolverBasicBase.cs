@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Minesolver.Solvers.Basic
 {
-    public abstract class SolverBasicBase : SolverBase<CoordData>
+    public abstract class SolverBasicBase : SolverBase<FieldData<CoordData>, CoordData>
     {
         public SolverBasicBase(FieldBase field) : base(field)
         {

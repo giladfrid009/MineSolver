@@ -1,14 +1,13 @@
-﻿using Minesolver.Solvers.Basic;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
 
 namespace Minesolver.Solvers.Utils
 {
     public static class Benchmarks
     {
-
-        private static void CheckCompatibility<TCoordData>(SolverBase<TCoordData> solver) where TCoordData : CoordData, new()
+        private static void CheckCompatibility<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver)
+            where TCoordData : CoordData, new()
+            where TFieldData : FieldData<TCoordData>, new()
         {
             if (solver.Field is Field == false)
             {
@@ -16,12 +15,9 @@ namespace Minesolver.Solvers.Utils
             }
         }
 
-        private static void PrintLog(int iteration, int seed)
-        {
-            Console.WriteLine(string.Format("Iter: {0} | Seed: {1}", iteration, seed));
-        }
-
-        public static TimeSpan MeasureTime<TCoordData>(SolverBase<TCoordData> solver, int iterations, int? seed = null) where TCoordData : CoordData, new()
+        public static TimeSpan MeasureTime<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver, int iterations, int? seed = null)
+            where TCoordData : CoordData, new()
+            where TFieldData : FieldData<TCoordData>, new()
         {
             CheckCompatibility(solver);
 
@@ -44,7 +40,9 @@ namespace Minesolver.Solvers.Utils
             return stopwatch.Elapsed;
         }
 
-        public static int CountUnsolved<TCoordData>(SolverBase<TCoordData> solver, int iterations, int? seed = null) where TCoordData : CoordData, new()
+        public static int CountUnsolved<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver, int iterations, int? seed = null, Action onIter = null)
+            where TCoordData : CoordData, new()
+            where TFieldData : FieldData<TCoordData>, new()
         {
             CheckCompatibility(solver);
 
@@ -74,34 +72,12 @@ namespace Minesolver.Solvers.Utils
                             totalHidden++;
                         }
                     }
-                }                
+                }
+
+                onIter?.Invoke();
             }
 
             return totalHidden;
-        }
-
-        public static IEnumerable<SolverBase<TCoordData>> RunSolver<TCoordData>(SolverBase<TCoordData> solver, int iterations, int? seed = null) where TCoordData : CoordData, new()
-        {
-            CheckCompatibility(solver);
-
-            Random rnd = seed != null ? new Random(seed.Value) : new Random();
-            Field field = (Field)solver.Field;
-
-            int xMid = field.Width / 2;
-            int yMid = field.Height / 2;
-
-            for (int i = 0; i < iterations; i++)
-            {
-                int localSeed = rnd.Next();
-
-                PrintLog(i, localSeed);
-
-                field.Generate(0.2, xMid, yMid, 3, localSeed);
-
-                solver.Solve();
-
-                yield return solver;
-            }
         }
     }
 }

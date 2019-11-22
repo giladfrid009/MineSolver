@@ -60,15 +60,15 @@ namespace Minesolver.Solvers
 
             fieldData[x, y].TryAdvanced = false;
 
-            if (fieldData.IsSolved(x, y) || (fieldData[x, y].IsValue == false))
+            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false))
             {
                 return false;
             }
 
             CalcTotals(x, y);
 
-            var hidden = GetHidden(x, y);
-            var solved = new List<(int, int)>();
+            List<(int X, int Y)> hidden = GetHidden(x, y);
+            List<(int, int)> solved = new List<(int, int)>();
 
             foreach ((int x2, int y2) in hidden)
             {
@@ -85,20 +85,24 @@ namespace Minesolver.Solvers
                     solved.Add((x2, y2));
                 }
 
+
+                // todo: for testing purposes.
                 if (HasLost)
+                {
                     throw new System.Exception();
+                }
             }
 
-            var affected = new HashSet<(int, int)>();
+            HashSet<(int, int)> affected = new HashSet<(int, int)>();
 
             foreach ((int x2, int y2) in solved)
             {
                 ResetCoordData(x2, y2, affected);
             }
 
-            foreach (var coord in hidden)
+            foreach ((int X, int Y) coord in hidden)
             {
-                fieldData[coord].Reset();                
+                fieldData[coord].Reset();
             }
 
             return solved.Count > 0;
@@ -108,7 +112,7 @@ namespace Minesolver.Solvers
         {
             int nFlagsMissing = Field[x, y] - fieldData.NumMines(x, y);
 
-            var hidden = GetHidden(x, y);
+            List<(int X, int Y)> hidden = GetHidden(x, y);
 
             Combo[] combos = comboLibrary[hidden.Count, nFlagsMissing];
 
@@ -129,7 +133,7 @@ namespace Minesolver.Solvers
                     {
                         fieldData[coord].TotalCombos++;
 
-                        if (fieldData[coord].IsFlagged)
+                        if (fieldData[coord].ForceFlag)
                         {
                             fieldData[coord].TotalFlagged++;
                         }
@@ -159,7 +163,7 @@ namespace Minesolver.Solvers
 
         private bool AreValidCombos(int x, int y)
         {
-            var hidden = GetNotForced(GetHidden(x, y));
+            List<(int X, int Y)> hidden = GetNotForced(GetHidden(x, y));
 
             if (hidden.Count == 0)
             {

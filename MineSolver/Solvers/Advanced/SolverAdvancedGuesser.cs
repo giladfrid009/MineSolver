@@ -18,7 +18,7 @@ namespace Minesolver.Solvers
         {
             Reset();
 
-            while (fieldData.IsFieldSolved == false)
+            while (fieldData.IsFieldSolved() == false)
             {
                 FieldState oldState = new FieldState(Field);
 
@@ -64,7 +64,7 @@ namespace Minesolver.Solvers
 
         private bool CalcTotals(int x, int y)
         {
-            if (fieldData.IsSolved(x, y) || (fieldData[x, y].IsValue == false))
+            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false))
             {
                 return false;
             }
@@ -106,7 +106,7 @@ namespace Minesolver.Solvers
                     {
                         fieldData[coord].TotalCombos++;
 
-                        if (fieldData[coord].IsFlagged)
+                        if (fieldData[coord].ForceFlag)
                         {
                             fieldData[coord].TotalFlagged++;
                         }
@@ -151,7 +151,7 @@ namespace Minesolver.Solvers
             {
                 for (int y = 0; y < height; y++)
                 {
-                    if (fieldData[x, y].IsRevealed || fieldData[x, y].TotalCombos == 0)
+                    if (fieldData.IsRevealed(x, y) || fieldData[x, y].TotalCombos == 0)
                     {
                         continue;
                     }

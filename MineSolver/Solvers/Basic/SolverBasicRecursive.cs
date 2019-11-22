@@ -27,7 +27,7 @@ namespace Minesolver.Solvers
 
         private void SolveCoord(int x, int y)
         {
-            if (fieldData.IsSolved(x, y) || (fieldData[x, y].IsValue == false))
+            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false))
             {
                 return;
             }

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Minesolver.Solvers.Advanced
 {
-    public abstract class SolverAdvancedBase : SolverBase<CoordDataAdvanced>
+    public abstract class SolverAdvancedBase : SolverBase<FieldDataAdvanced, CoordDataAdvanced>
     {
         protected readonly ComboLibrary comboLibrary;
 
@@ -35,7 +35,7 @@ namespace Minesolver.Solvers.Advanced
 
         protected void ResetCoordData(int x, int y, HashSet<(int, int)> processed)
         {
-            if (fieldData[x, y].IsValue && fieldData.IsSolved(x, y) == false)
+            if (fieldData.IsValue(x, y) && fieldData.IsSolved(x, y) == false)
             {
                 ResetCoordRecursive(x, y, processed);
             }
