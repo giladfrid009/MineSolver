@@ -1,5 +1,5 @@
-﻿using Minesolver.Solvers;
-using Minesolver.Solvers.Utils;
+﻿using Minesolver.ConsoleField;
+using Minesolver.Solvers;
 using System;
 
 namespace Minesolver
@@ -8,7 +8,7 @@ namespace Minesolver
     {
         private static void Main()
         {
-            Field field = new Field(50, 50);
+            CField field = new CField(50, 50);
 
             SolverAdvancedGuesser solverGuesser = new SolverAdvancedGuesser(field);
 

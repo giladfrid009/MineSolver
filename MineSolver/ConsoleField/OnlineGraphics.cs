@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Minesolver
+namespace Minesolver.ConsoleField
 {
     public static class OnlineGraphics
     {

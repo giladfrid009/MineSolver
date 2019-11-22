@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using Minesolver.Solvers;
 
-namespace Minesolver.Solvers.Utils
+namespace Minesolver.ConsoleField
 {
     public static class Benchmarks
     {
@@ -9,7 +10,7 @@ namespace Minesolver.Solvers.Utils
             where TCoordData : CoordData, new()
             where TFieldData : FieldData<TCoordData>, new()
         {
-            if (solver.Field is Field == false)
+            if (solver.Field is CField == false)
             {
                 throw new Exception("Field class isn't compatible with this function");
             }
@@ -23,7 +24,7 @@ namespace Minesolver.Solvers.Utils
 
             Random rnd = seed != null ? new Random(seed.Value) : new Random();
             Stopwatch stopwatch = new Stopwatch();
-            Field field = (Field)solver.Field;
+            CField field = (CField)solver.Field;
 
             int xMid = field.Width / 2;
             int yMid = field.Height / 2;
@@ -47,7 +48,7 @@ namespace Minesolver.Solvers.Utils
             CheckCompatibility(solver);
 
             Random rnd = seed != null ? new Random(seed.Value) : new Random();
-            Field field = (Field)solver.Field;
+            CField field = (CField)solver.Field;
 
             int width = field.Width;
             int height = field.Height;

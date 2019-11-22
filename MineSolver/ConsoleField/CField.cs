@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Minesolver
+namespace Minesolver.ConsoleField
 {
-    public class Field : FieldBase
+    public class CField : FieldBase
     {
         private static readonly Random staticRnd = new Random();
 
         private readonly int[,] fieldSolved;
         private readonly int[,] fieldUnsolved;
 
-        public Field(int width, int height) : base(width, height)
+        public CField(int width, int height) : base(width, height)
         {
             fieldSolved = new int[Width, Height];
             fieldUnsolved = new int[Width, Height];
