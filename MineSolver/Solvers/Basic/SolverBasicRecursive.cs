@@ -19,6 +19,11 @@ namespace Minesolver.Solvers
                 for (int y = 0; y < height; y++)
                 {
                     SolveCoord(x, y);
+
+                    if (HasLost)
+                    {
+                        return log.Clone();
+                    }
                 }
             }
 
@@ -27,7 +32,7 @@ namespace Minesolver.Solvers
 
         private void SolveCoord(int x, int y)
         {
-            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false))
+            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false) || HasLost)
             {
                 return;
             }

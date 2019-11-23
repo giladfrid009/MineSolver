@@ -41,7 +41,7 @@ namespace Minesolver.ConsoleField.Benchmark
             return stopwatch.Elapsed;
         }
 
-        public static int CountUnsolved<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver, int iterations, int? seed = null, Action? onIter = null)
+        public static int CountUnsolved<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver, int iterations, int? seed = null)
             where TCoordData : CoordData
             where TFieldData : FieldData<TCoordData>
         {
@@ -74,8 +74,6 @@ namespace Minesolver.ConsoleField.Benchmark
                         }
                     }
                 }
-
-                onIter?.Invoke();
             }
 
             return totalHidden;

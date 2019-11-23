@@ -26,7 +26,7 @@ namespace Minesolver.Solvers
 
                         foreach ((int x2, int y2) in pending)
                         {
-                            pendingNew.UnionWith(SolveCoord(x2, y2));
+                            pendingNew.UnionWith(SolveCoord(x2, y2));                      
                         }
 
                         pending = pendingNew;
@@ -39,7 +39,7 @@ namespace Minesolver.Solvers
 
         private HashSet<(int X, int Y)> SolveCoord(int x, int y)
         {
-            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false))
+            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false) || HasLost)
             {
                 return new HashSet<(int, int)>();
             }

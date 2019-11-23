@@ -29,6 +29,11 @@ namespace Minesolver.Solvers
 
                 log.Combine(solverAdvanced.Solve());
 
+                if (HasLost)
+                {
+                    return log.Clone();
+                }
+
                 ResetFieldChanges(oldState);
 
                 for (int x = 0; x < width; x++)

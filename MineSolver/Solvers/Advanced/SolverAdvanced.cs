@@ -26,6 +26,11 @@ namespace Minesolver.Solvers
 
                 log.Combine(solverBasic.Solve());
 
+                if (HasLost)
+                {
+                    return log.Clone();
+                }
+
                 ResetFieldChanges(oldState);
 
                 for (int x = 0; x < width; x++)
@@ -34,6 +39,11 @@ namespace Minesolver.Solvers
                     {
                         if (SolveCoord(x, y))
                         {
+                            if (HasLost)
+                            {
+                                return log.Clone();
+                            }
+
                             progress = true;
                             x = width;
                             y = height;
@@ -83,7 +93,12 @@ namespace Minesolver.Solvers
                     log.AddMove(x2, y2, Move.Flag);
                     solved.Add((x2, y2));
                 }
-            }
+
+                if (HasLost)
+                {
+                    return false;
+                }
+            }       
 
             HashSet<(int, int)> affected = new HashSet<(int, int)>();
 

@@ -7,7 +7,7 @@ namespace Minesolver.Solvers.Advanced
     {
         protected readonly ComboLibrary comboLibrary;
 
-        public uint MaxDepth { get; set; }
+        public uint MaxDepth { get; set; } = 10;
 
         public SolverAdvancedBase(FieldBase field) : base(field)
         {
