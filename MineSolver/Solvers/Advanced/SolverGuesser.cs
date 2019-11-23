@@ -7,7 +7,12 @@ namespace Minesolver.Solvers
     internal class SolverGuesser : SolverAdvancedBase
     {
         private readonly SolverAdvanced solverAdvanced;
-        public double testVal = 0;
+
+        public uint MaxDepthSecondary
+        {
+            get => solverAdvanced.MaxDepth;
+            set => solverAdvanced.MaxDepth = value;
+        }
 
         public SolverGuesser(FieldBase field) : base(field)
         {
@@ -35,7 +40,7 @@ namespace Minesolver.Solvers
                             continue;
                         }
 
-                        CalcTotals(x, y);
+                        CalcTotals(x, y, 1);
 
                         fieldData[x, y].TryAdvanced = false;
                     }
@@ -62,7 +67,7 @@ namespace Minesolver.Solvers
             return log.Clone();
         }
 
-        private bool CalcTotals(int x, int y)
+        private bool CalcTotals(int x, int y, uint depth)
         {
             if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false))
             {
@@ -83,6 +88,11 @@ namespace Minesolver.Solvers
                 return false;
             }
 
+            if (depth > MaxDepth)
+            {
+                return true;
+            }
+
             Combo[] combos = comboLibrary[hidden.Count, nFlagsMissing];
 
             HashSet<(int X, int Y)> affected = new HashSet<(int X, int Y)>();
@@ -98,7 +108,7 @@ namespace Minesolver.Solvers
             {
                 combo.Apply(fieldData, hidden);
 
-                if (IsComboValid(affected))
+                if (IsComboValid(affected, depth + 1))
                 {
                     result = true;
 
@@ -119,7 +129,7 @@ namespace Minesolver.Solvers
             return result;
         }
 
-        protected override bool IsCoordValid(int x, int y)
+        protected override bool IsCoordValid(int x, int y, uint depth)
         {
             int nMines = fieldData.NumMines(x, y);
 
@@ -128,14 +138,14 @@ namespace Minesolver.Solvers
                 return false;
             }
 
-            if (nMines < Field[x, y] && CalcTotals(x, y) == false)
+            if (nMines < Field[x, y] && CalcTotals(x, y, depth) == false)
             {
                 return false;
             }
 
             if (nMines == Field[x, y])
             {
-                CalcTotals(x, y);
+                CalcTotals(x, y, depth);
             }
 
             return true;

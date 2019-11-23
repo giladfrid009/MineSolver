@@ -7,6 +7,8 @@ namespace Minesolver.Solvers.Advanced
     {
         protected readonly ComboLibrary comboLibrary;
 
+        public uint MaxDepth { get; set; }
+
         public SolverAdvancedBase(FieldBase field) : base(field)
         {
             comboLibrary = new ComboLibrary();
@@ -80,11 +82,11 @@ namespace Minesolver.Solvers.Advanced
             }
         }
 
-        protected bool IsComboValid(HashSet<(int X, int Y)> affected)
+        protected bool IsComboValid(HashSet<(int X, int Y)> affected, uint depth)
         {
             foreach ((int x, int y) in affected)
             {
-                if (IsCoordValid(x, y) == false)
+                if (IsCoordValid(x, y, depth) == false)
                 {
                     return false;
                 }
@@ -93,7 +95,7 @@ namespace Minesolver.Solvers.Advanced
             return true;
         }
 
-        protected abstract bool IsCoordValid(int x, int y);
+        protected abstract bool IsCoordValid(int x, int y, uint depth);
 
         protected override void Reset()
         {

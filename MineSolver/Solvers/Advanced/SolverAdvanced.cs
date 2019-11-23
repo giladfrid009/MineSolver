@@ -1,6 +1,5 @@
 ﻿using Minesolver.Solvers.Advanced;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Minesolver.Solvers
 {
@@ -120,7 +119,7 @@ namespace Minesolver.Solvers
             {
                 combo.Apply(fieldData, hidden);
 
-                if (IsComboValid(affected))
+                if (IsComboValid(affected, 1))
                 {
                     foreach ((int X, int Y) coord in hidden)
                     {
@@ -137,7 +136,7 @@ namespace Minesolver.Solvers
             }
         }
 
-        protected override bool IsCoordValid(int x, int y)
+        protected override bool IsCoordValid(int x, int y, uint depth)
         {
             int nMines = fieldData.NumMines(x, y);
 
@@ -146,7 +145,7 @@ namespace Minesolver.Solvers
                 return false;
             }
 
-            if (nMines < Field[x, y] && AreValidCombos(x, y) == false)
+            if (nMines < Field[x, y] && AreValidCombos(x, y, depth) == false)
             {
                 return false;
             }
@@ -154,7 +153,7 @@ namespace Minesolver.Solvers
             return true;
         }
 
-        private bool AreValidCombos(int x, int y)
+        private bool AreValidCombos(int x, int y, uint depth)
         {
             List<(int X, int Y)> hidden = GetNotForced(GetHidden(x, y));
 
@@ -170,6 +169,11 @@ namespace Minesolver.Solvers
                 return false;
             }
 
+            if (depth > MaxDepth)
+            {
+                return true;
+            }
+
             HashSet<(int X, int Y)> affected = new HashSet<(int X, int Y)>();
 
             foreach ((int x2, int y2) in hidden)
@@ -183,7 +187,7 @@ namespace Minesolver.Solvers
             {
                 combo.Apply(fieldData, hidden);
 
-                if (affected.All(coord => IsCoordValid(coord.X, coord.Y)))
+                if (IsComboValid(affected, depth + 1))
                 {
                     combo.Remove(fieldData, hidden);
                     return true;

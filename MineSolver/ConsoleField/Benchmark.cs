@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Minesolver.Solvers;
+using System;
 using System.Diagnostics;
-using Minesolver.Solvers;
 
 namespace Minesolver.ConsoleField.Benchmark
 {
