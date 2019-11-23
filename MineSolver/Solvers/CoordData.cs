@@ -4,9 +4,9 @@ namespace Minesolver.Solvers
 {
     public class CoordData
     {
-        public List<(int X, int Y)> Neighbors { get; private set; }
+        public List<(int X, int Y)> Neighbors { get; }
 
-        public virtual void Initialize(int x, int y, FieldBase field)
+        public CoordData(int x, int y, FieldBase field)
         {
             Neighbors = field.GetNeighbors(x, y);
         }

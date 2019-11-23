@@ -7,8 +7,8 @@ namespace Minesolver.ConsoleField.Benchmark
     public static class Benchmarks
     {
         private static void CheckCompatibility<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver)
-            where TCoordData : CoordData, new()
-            where TFieldData : FieldData<TCoordData>, new()
+            where TCoordData : CoordData
+            where TFieldData : FieldData<TCoordData>
         {
             if (solver.Field is CField == false)
             {
@@ -17,8 +17,8 @@ namespace Minesolver.ConsoleField.Benchmark
         }
 
         public static TimeSpan MeasureTime<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver, int iterations, int? seed = null)
-            where TCoordData : CoordData, new()
-            where TFieldData : FieldData<TCoordData>, new()
+            where TCoordData : CoordData
+            where TFieldData : FieldData<TCoordData>
         {
             CheckCompatibility(solver);
 
@@ -42,8 +42,8 @@ namespace Minesolver.ConsoleField.Benchmark
         }
 
         public static int CountUnsolved<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver, int iterations, int? seed = null, Action? onIter = null)
-            where TCoordData : CoordData, new()
-            where TFieldData : FieldData<TCoordData>, new()
+            where TCoordData : CoordData
+            where TFieldData : FieldData<TCoordData>
         {
             CheckCompatibility(solver);
 

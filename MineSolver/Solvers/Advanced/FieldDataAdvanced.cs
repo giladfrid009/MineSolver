@@ -2,6 +2,11 @@
 {
     public class FieldDataAdvanced : FieldData<CoordDataAdvanced>
     {
+        public FieldDataAdvanced(FieldBase field) : base(field)
+        {
+
+        }
+
         public override int NumHidden(int x, int y)
         {
             int num = 0;

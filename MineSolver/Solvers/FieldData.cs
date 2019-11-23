@@ -2,16 +2,16 @@
 
 namespace Minesolver.Solvers
 {
-    public class FieldData<TCoordData> where TCoordData : CoordData, new()
+    public class FieldData<TCoordData> where TCoordData : CoordData
     {
         public int Width => Field.Width;
         public int Height => Field.Height;
 
-        protected FieldBase Field { get; private set; }
+        protected readonly FieldBase Field;
 
-        protected TCoordData[,] CoordsData { get; private set; }
+        protected readonly TCoordData[,] CoordsData;
 
-        public void Initialize(FieldBase field)
+        public FieldData(FieldBase field)
         {
             Field = field;
             CoordsData = new TCoordData[Width, Height];
@@ -20,8 +20,7 @@ namespace Minesolver.Solvers
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    CoordsData[x, y] = new TCoordData();
-                    CoordsData[x, y].Initialize(x, y, field);
+                    CoordsData[x, y] = (TCoordData)Activator.CreateInstance(typeof(TCoordData), x, y, field)!;
                 }
             }
         }

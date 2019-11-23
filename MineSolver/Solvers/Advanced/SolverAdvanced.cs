@@ -84,13 +84,6 @@ namespace Minesolver.Solvers
                     log.AddMove(x2, y2, Move.Flag);
                     solved.Add((x2, y2));
                 }
-
-
-                // todo: for testing purposes.
-                if (HasLost)
-                {
-                    throw new System.Exception();
-                }
             }
 
             HashSet<(int, int)> affected = new HashSet<(int, int)>();

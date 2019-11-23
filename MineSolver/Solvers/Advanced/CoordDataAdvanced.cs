@@ -10,6 +10,11 @@
 
         public bool IsForced => ForceFlag || ForceReveal;
 
+        public CoordDataAdvanced(int x, int y, FieldBase field) : base(x, y, field)
+        {
+
+        }
+
         public virtual void Reset()
         {
             ForceFlag = false;

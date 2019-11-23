@@ -19,7 +19,7 @@ namespace Minesolver
 
             //Console.WriteLine(Benchmarks.MeasureTime(solverGuesser, 100, 0));
 
-            Console.ReadKey();           
+            Console.ReadKey();
         }
 
     }

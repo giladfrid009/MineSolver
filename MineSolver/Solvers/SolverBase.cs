@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Minesolver.Solvers
 {
     public abstract class SolverBase<TFieldData, TCoordData>
-        where TCoordData : CoordData, new()
-        where TFieldData : FieldData<TCoordData>, new()
+        where TCoordData : CoordData
+        where TFieldData : FieldData<TCoordData>
     {
         public FieldBase Field { get; }
         public bool HasLost { get; protected set; } = false;
@@ -17,8 +18,7 @@ namespace Minesolver.Solvers
 
         public SolverBase(FieldBase field)
         {
-            fieldData = new TFieldData();
-            fieldData.Initialize(field);
+            fieldData = (TFieldData)Activator.CreateInstance(typeof(TFieldData), field)!;
 
             Field = field;
             log = new SolveLog();
