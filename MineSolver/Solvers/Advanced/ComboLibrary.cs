@@ -5,10 +5,11 @@ namespace Minesolver.Solvers.Advanced
 {
     public class ComboLibrary
     {
-        private static Combo[][][] combos;
+        private static readonly Combo[][][] combos;
 
         static ComboLibrary()
         {
+            combos = new Combo[9][][];
             GenerateComboLibrary();
         }
 
@@ -16,8 +17,6 @@ namespace Minesolver.Solvers.Advanced
 
         private static void GenerateComboLibrary()
         {
-            combos = new Combo[9][][];
-
             for (int nHidden = 0; nHidden <= 8; nHidden++)
             {
                 combos[nHidden] = new Combo[nHidden + 1][];

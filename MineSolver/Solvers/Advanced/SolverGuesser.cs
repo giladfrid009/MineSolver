@@ -52,7 +52,7 @@ namespace Minesolver.Solvers
                 }
 
                 (int xMin, int yMin) = FindMinimum();
-
+                
                 if (xMin == -1)
                 {
                     break;
@@ -156,6 +156,7 @@ namespace Minesolver.Solvers
             return true;
         }
 
+        // todo: we should find biggest peak, not min.
         private (int X, int Y) FindMinimum()
         {
             double minPrecent = 1.0;
@@ -172,11 +173,6 @@ namespace Minesolver.Solvers
                     }
 
                     double precent = (double)fieldData[x, y].TotalFlagged / fieldData[x, y].TotalCombos;
-
-                    if (precent == 0)
-                    {
-                        throw new Exception();
-                    }
 
                     if (precent < minPrecent)
                     {

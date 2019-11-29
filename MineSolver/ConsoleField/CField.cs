@@ -7,8 +7,8 @@ namespace Minesolver.ConsoleField
     {
         private static readonly Random staticRnd = new Random();
 
-        private readonly int[,] fieldSolved;
-        private readonly int[,] fieldUnsolved;
+        protected readonly int[,] fieldSolved;
+        protected readonly int[,] fieldUnsolved;
 
         public CField(int width, int height) : base(width, height)
         {
@@ -83,7 +83,7 @@ namespace Minesolver.ConsoleField
             }
         }
 
-        public void Generate(double minePrecent, int xOrigin, int yOrigin, int originSize = 3, int? seed = null)
+        public virtual void Generate(double minePrecent, int xOrigin, int yOrigin, int originSize = 3, int? seed = null)
         {
             Reset();
 
@@ -145,7 +145,7 @@ namespace Minesolver.ConsoleField
             }
         }
 
-        private void GenerateVals()
+        protected void GenerateVals()
         {
             for (int x = 0; x < Width; x++)
             {

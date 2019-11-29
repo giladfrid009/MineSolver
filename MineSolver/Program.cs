@@ -9,11 +9,9 @@ namespace Minesolver
     {
         private static void Main()
         {
-            CField field = new CField(50, 50);
+            CField field = new CField(260, 65);
 
             SolverGuesser solverGuesser = new SolverGuesser(field);
-
-            //OnlineGraphics.Subscibe(field);
 
             Console.WriteLine(Benchmarks.CountUnsolved(solverGuesser, 100, 0)); // 2070
 

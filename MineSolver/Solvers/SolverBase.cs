@@ -9,7 +9,7 @@ namespace Minesolver.Solvers
         where TFieldData : FieldData<TCoordData>
     {
         public FieldBase Field { get; }
-        public bool HasLost { get; protected set; } = false; // todo: place it somewhere global so all solvers will have the same hasLost
+        public bool HasLost { get; protected set; } = false;
 
         protected readonly TFieldData fieldData;
         protected readonly SolveLog log;
