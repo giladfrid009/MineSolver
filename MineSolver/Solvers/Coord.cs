@@ -2,11 +2,11 @@
 
 namespace Minesolver.Solvers
 {
-    public class CoordData
+    public class Coord
     {
         public List<(int X, int Y)> Neighbors { get; }
 
-        public CoordData(int x, int y, FieldBase field)
+        public Coord(int x, int y, BaseField field)
         {
             Neighbors = field.GetNeighbors(x, y);
         }

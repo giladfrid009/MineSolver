@@ -4,31 +4,31 @@ using System.Linq;
 
 namespace Minesolver.Solvers
 {
-    public abstract class SolverBase<TFieldData, TCoordData>
-        where TCoordData : CoordData
-        where TFieldData : FieldData<TCoordData>
+    public abstract class BaseSolver<TFieldData, TCoordData>
+        where TCoordData : Coord
+        where TFieldData : Field<TCoordData>
     {
-        public FieldBase Field { get; }
+        public BaseField Field { get; }
         public bool HasLost { get; protected set; } = false;
 
         protected readonly TFieldData fieldData;
-        protected readonly SolveLog log;
+        protected readonly MoveLog log;
         protected readonly int width;
         protected readonly int height;
 
-        public SolverBase(FieldBase field)
+        public BaseSolver(BaseField field)
         {
             fieldData = (TFieldData)Activator.CreateInstance(typeof(TFieldData), field)!;
 
             Field = field;
-            log = new SolveLog();
+            log = new MoveLog();
             width = field.Width;
             height = field.Height;
 
             field.OnLoss += (x, y) => HasLost = true;
         }
 
-        public abstract SolveLog Solve();
+        public abstract MoveLog Solve();
 
         protected List<(int X, int Y)> GetHidden(int x, int y)
         {
@@ -47,7 +47,7 @@ namespace Minesolver.Solvers
 
         protected virtual void Reset()
         {
-            log.Clear();
+            log.Moves.Clear();
 
             HasLost = false;
         }

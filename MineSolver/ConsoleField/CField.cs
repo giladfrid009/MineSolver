@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Minesolver.ConsoleField
 {
-    public class CField : FieldBase
+    public class CField : BaseField
     {
         private static readonly Random staticRnd = new Random();
 

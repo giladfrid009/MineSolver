@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace Minesolver.Solvers.Basic
 {
-    public abstract class SolverBasicBase : SolverBase<FieldData<CoordData>, CoordData>
+    public abstract class BaseSolverBasic : BaseSolver<Field<Coord>, Coord>
     {
-        public SolverBasicBase(FieldBase field) : base(field)
+        public BaseSolverBasic(BaseField field) : base(field)
         {
 
         }
@@ -20,7 +20,7 @@ namespace Minesolver.Solvers.Basic
             foreach ((int x2, int y2) in hidden)
             {
                 Field.Reveal(x2, y2);
-                log.AddMove(x2, y2, Move.Reveal);
+                log.Add(x2, y2, Move.Reveal);
             }
 
             foreach ((int x2, int y2) in hidden)
@@ -55,7 +55,7 @@ namespace Minesolver.Solvers.Basic
             foreach ((int x2, int y2) in hidden)
             {
                 Field.Flag(x2, y2);
-                log.AddMove(x2, y2, Move.Flag);
+                log.Add(x2, y2, Move.Flag);
             }
 
             foreach ((int x2, int y2) in hidden)

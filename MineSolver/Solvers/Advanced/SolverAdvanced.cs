@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 namespace Minesolver.Solvers
 {
-    internal class SolverAdvanced : SolverAdvancedBase
+    internal class SolverAdvanced : BaseSolverAdvanced
     {
         private readonly SolverBasic solverBasic;
 
-        public SolverAdvanced(FieldBase field) : base(field)
+        public SolverAdvanced(BaseField field) : base(field)
         {
             solverBasic = new SolverBasic(field);
         }
 
-        public override SolveLog Solve()
+        public override MoveLog Solve()
         {
             Reset();
 
@@ -84,13 +84,13 @@ namespace Minesolver.Solvers
                 if (fieldData[x2, y2].TotalFlagged == 0)
                 {
                     Field.Reveal(x2, y2);
-                    log.AddMove(x2, y2, Move.Reveal);
+                    log.Add(x2, y2, Move.Reveal);
                     solved.Add((x2, y2));
                 }
                 else if (fieldData[x2, y2].TotalFlagged == fieldData[x2, y2].TotalCombos)
                 {
                     Field.Flag(x2, y2);
-                    log.AddMove(x2, y2, Move.Flag);
+                    log.Add(x2, y2, Move.Flag);
                     solved.Add((x2, y2));
                 }
 

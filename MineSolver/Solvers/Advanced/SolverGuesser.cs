@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Minesolver.Solvers
 {
-    internal class SolverGuesser : SolverAdvancedBase
+    internal class SolverGuesser : BaseSolverAdvanced
     {
         private readonly SolverAdvanced solverAdvanced;
 
@@ -14,12 +14,12 @@ namespace Minesolver.Solvers
             set => solverAdvanced.MaxDepth = value;
         }
 
-        public SolverGuesser(FieldBase field) : base(field)
+        public SolverGuesser(BaseField field) : base(field)
         {
             solverAdvanced = new SolverAdvanced(field);
         }
 
-        public override SolveLog Solve()
+        public override MoveLog Solve()
         {
             Reset();
 
@@ -59,7 +59,7 @@ namespace Minesolver.Solvers
                 }
 
                 Field.Reveal(xMin, yMin);
-                log.AddMove(xMin, yMin, Move.Reveal);
+                log.Add(xMin, yMin, Move.Reveal);
 
                 if (HasLost)
                 {

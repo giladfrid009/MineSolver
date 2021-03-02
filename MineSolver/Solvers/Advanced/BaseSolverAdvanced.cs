@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace Minesolver.Solvers.Advanced
 {
-    public abstract class SolverAdvancedBase : SolverBase<FieldDataAdvanced, CoordDataAdvanced>
+    public abstract class BaseSolverAdvanced : BaseSolver<FieldAdvanced, CoordAdvanced>
     {
         protected readonly ComboLibrary comboLibrary;
 
         public uint MaxDepth { get; set; } = 10;
 
-        public SolverAdvancedBase(FieldBase field) : base(field)
+        public BaseSolverAdvanced(BaseField field) : base(field)
         {
             comboLibrary = new ComboLibrary();
         }

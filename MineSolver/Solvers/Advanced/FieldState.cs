@@ -9,7 +9,7 @@
 
         public int this[int x, int y] => fieldState[x, y];
 
-        public FieldState(FieldBase field)
+        public FieldState(BaseField field)
         {
             Width = field.Width;
             Height = field.Height;

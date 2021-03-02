@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace Minesolver.Solvers
 {
-    public class SolverBasic : SolverBasicBase
+    public class SolverBasic : BaseSolverBasic
     {
-        public SolverBasic(FieldBase field) : base(field)
+        public SolverBasic(BaseField field) : base(field)
         {
 
         }
 
-        public override SolveLog Solve()
+        public override MoveLog Solve()
         {
             Reset();
 

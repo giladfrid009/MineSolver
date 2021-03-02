@@ -1,8 +1,8 @@
 ﻿namespace Minesolver.Solvers.Advanced
 {
-    public class FieldDataAdvanced : FieldData<CoordDataAdvanced>
+    public class FieldAdvanced : Field<CoordAdvanced>
     {
-        public FieldDataAdvanced(FieldBase field) : base(field)
+        public FieldAdvanced(BaseField field) : base(field)
         {
 
         }
@@ -11,9 +11,9 @@
         {
             int num = 0;
 
-            foreach ((int x2, int y2) in CoordsData[x, y].Neighbors)
+            foreach ((int x2, int y2) in coordsData[x, y].Neighbors)
             {
-                if (CoordsData[x2, y2].IsForced == false && IsRevealed(x2, y2) == false)
+                if (coordsData[x2, y2].IsForced == false && IsRevealed(x2, y2) == false)
                 {
                     num++;
                 }
@@ -26,9 +26,9 @@
         {
             int num = 0;
 
-            foreach ((int x2, int y2) in CoordsData[x, y].Neighbors)
+            foreach ((int x2, int y2) in coordsData[x, y].Neighbors)
             {
-                if (IsFlagged(x2, y2) || CoordsData[x2, y2].ForceFlag)
+                if (IsFlagged(x2, y2) || coordsData[x2, y2].ForceFlag)
                 {
                     num++;
                 }

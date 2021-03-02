@@ -1,6 +1,6 @@
 ﻿namespace Minesolver.Solvers.Advanced
 {
-    public class CoordDataAdvanced : CoordData
+    public class CoordAdvanced : Coord
     {
         public bool ForceFlag = false;
         public bool ForceReveal = false;
@@ -10,7 +10,7 @@
 
         public bool IsForced => ForceFlag || ForceReveal;
 
-        public CoordDataAdvanced(int x, int y, FieldBase field) : base(x, y, field)
+        public CoordAdvanced(int x, int y, BaseField field) : base(x, y, field)
         {
 
         }

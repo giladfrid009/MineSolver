@@ -6,9 +6,9 @@ namespace Minesolver.ConsoleField.Benchmark
 {
     public static class Benchmarks
     {
-        private static void CheckCompatibility<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver)
-            where TCoordData : CoordData
-            where TFieldData : FieldData<TCoordData>
+        private static void CheckCompatibility<TFieldData, TCoordData>(BaseSolver<TFieldData, TCoordData> solver)
+            where TCoordData : Coord
+            where TFieldData : Field<TCoordData>
         {
             if (solver.Field is CField == false)
             {
@@ -16,9 +16,9 @@ namespace Minesolver.ConsoleField.Benchmark
             }
         }
 
-        public static TimeSpan MeasureTime<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver, int iterations, int? seed = null)
-            where TCoordData : CoordData
-            where TFieldData : FieldData<TCoordData>
+        public static TimeSpan MeasureTime<TFieldData, TCoordData>(BaseSolver<TFieldData, TCoordData> solver, int iterations, int? seed = null)
+            where TCoordData : Coord
+            where TFieldData : Field<TCoordData>
         {
             CheckCompatibility(solver);
 
@@ -41,9 +41,9 @@ namespace Minesolver.ConsoleField.Benchmark
             return stopwatch.Elapsed;
         }
 
-        public static int CountUnsolved<TFieldData, TCoordData>(SolverBase<TFieldData, TCoordData> solver, int iterations, int? seed = null)
-            where TCoordData : CoordData
-            where TFieldData : FieldData<TCoordData>
+        public static int CountUnsolved<TFieldData, TCoordData>(BaseSolver<TFieldData, TCoordData> solver, int iterations, int? seed = null)
+            where TCoordData : Coord
+            where TFieldData : Field<TCoordData>
         {
             CheckCompatibility(solver);
 
@@ -68,7 +68,7 @@ namespace Minesolver.ConsoleField.Benchmark
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (field[x, y] == FieldBase.Hidden)
+                        if (field[x, y] == BaseField.Hidden)
                         {
                             totalHidden++;
                         }

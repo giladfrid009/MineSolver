@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Minesolver
 {
-    public abstract class FieldBase
+    public abstract class BaseField
     {
         public event CoordFunc? OnLoss;
         public event CoordFunc? OnFlag;
@@ -20,7 +20,7 @@ namespace Minesolver
         public const int Mine = -1;
         public const int Hidden = -2;
 
-        protected FieldBase(int width, int height)
+        protected BaseField(int width, int height)
         {
             Width = width;
             Height = height;
@@ -36,25 +36,13 @@ namespace Minesolver
 
         public abstract int Reveal(int x, int y);
 
-        protected void RaiseOnFlag(int x, int y)
-        {
-            OnFlag?.Invoke(x, y);
-        }
+        protected void RaiseOnFlag(int x, int y) => OnFlag?.Invoke(x, y);
 
-        protected void RaiseOnUnflag(int x, int y)
-        {
-            OnUnflag?.Invoke(x, y);
-        }
+        protected void RaiseOnUnflag(int x, int y) => OnUnflag?.Invoke(x, y);
 
-        protected void RaiseOnReveal(int x, int y, int val)
-        {
-            OnReveal?.Invoke(x, y, val);
-        }
+        protected void RaiseOnReveal(int x, int y, int val) => OnReveal?.Invoke(x, y, val);
 
-        protected void RaiseOnLose(int x, int y)
-        {
-            OnLoss?.Invoke(x, y);
-        }
+        protected void RaiseOnLose(int x, int y) => OnLoss?.Invoke(x, y);
 
         public List<(int X, int Y)> GetNeighbors(int x, int y)
         {
@@ -81,9 +69,9 @@ namespace Minesolver
             return neighbors;
         }
 
-        public string StateToString()
+        public override string ToString()
         {
-            StringBuilder strBuilder = new StringBuilder(Width * Height + 2 * Height);
+            StringBuilder str = new StringBuilder(Width * Height + 2 * Height);
 
             for (int y = 0; y < Height; y++)
             {
@@ -93,21 +81,22 @@ namespace Minesolver
 
                     if (val == Hidden)
                     {
-                        strBuilder.Append(' ');
+                        str.Append(' ');
                     }
                     else if (val == Mine)
                     {
-                        strBuilder.Append('@');
+                        str.Append('@');
                     }
                     else
                     {
-                        strBuilder.Append(val);
+                        str.Append(val);
                     }
                 }
-                strBuilder.Append("\n");
+
+                str.Append("\n");
             }
 
-            return strBuilder.ToString();
+            return str.ToString();
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Minesolver.Solvers.Advanced
 
         public bool this[int index] => vals[index];
 
-        public void Apply<TCoordData>(FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced
+        public void Apply<TCoordData>(Field<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordAdvanced
         {
             if (coords.Count != Length)
             {
@@ -51,7 +51,7 @@ namespace Minesolver.Solvers.Advanced
             }
         }
 
-        public void Remove<TCoordData>(FieldData<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordDataAdvanced
+        public void Remove<TCoordData>(Field<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordAdvanced
         {
             if (coords.Count != Length)
             {
