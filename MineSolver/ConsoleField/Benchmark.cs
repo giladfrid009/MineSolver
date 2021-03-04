@@ -6,9 +6,9 @@ namespace Minesolver.ConsoleField.Benchmark
 {
     public static class Benchmarks
     {
-        private static void CheckCompatibility<TFieldData, TCoordData>(BaseSolver<TFieldData, TCoordData> solver)
-            where TCoordData : Coord
-            where TFieldData : Field<TCoordData>
+        private static void CheckCompatibility<TField, TCoord>(BaseSolver<TField, TCoord> solver)
+            where TCoord : Coord
+            where TField : Field<TCoord>
         {
             if (solver.Field is CField == false)
             {

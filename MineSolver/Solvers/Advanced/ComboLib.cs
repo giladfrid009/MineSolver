@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace Minesolver.Solvers.Advanced
 {
-    public class ComboLibrary
+    public class ComboLib
     {
         private static readonly Combo[][][] combos;
 
-        static ComboLibrary()
+        static ComboLib()
         {
             combos = new Combo[9][][];
             GenerateComboLibrary();

@@ -29,11 +29,11 @@ namespace Minesolver.Solvers.Advanced
 
         public bool this[int index] => vals[index];
 
-        public void Apply<TCoordData>(Field<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordAdvanced
+        public void Apply<TCoord>(Field<TCoord> field, List<(int X, int Y)> coords) where TCoord : CoordAdvanced
         {
             if (coords.Count != Length)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(coords));
             }
 
             for (int i = 0; i < Length; i++)
@@ -42,28 +42,28 @@ namespace Minesolver.Solvers.Advanced
 
                 if (vals[i])
                 {
-                    fieldData[x, y].ForceFlag = true;
+                    field[x, y].ForceFlag = true;
                 }
                 else
                 {
-                    fieldData[x, y].ForceReveal = true;
+                    field[x, y].ForceReveal = true;
                 }
             }
         }
 
-        public void Remove<TCoordData>(Field<TCoordData> fieldData, List<(int X, int Y)> coords) where TCoordData : CoordAdvanced
+        public void Remove<TCoord>(Field<TCoord> field, List<(int X, int Y)> coords) where TCoord : CoordAdvanced
         {
             if (coords.Count != Length)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(coords));
             }
 
             for (int i = 0; i < Length; i++)
             {
                 (int x, int y) = coords[i];
 
-                fieldData[x, y].ForceFlag = false;
-                fieldData[x, y].ForceReveal = false;
+                field[x, y].ForceFlag = false;
+                field[x, y].ForceReveal = false;
             }
         }
     }

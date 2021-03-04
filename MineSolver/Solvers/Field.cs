@@ -2,32 +2,32 @@
 
 namespace Minesolver.Solvers
 {
-    public class Field<TCoordData> where TCoordData : Coord
+    public class Field<TCoord> where TCoord : Coord
     {
         public int Width => field.Width;
         public int Height => field.Height;
 
         protected readonly BaseField field;
 
-        protected readonly TCoordData[,] coordsData;
+        protected readonly TCoord[,] coords;
 
         public Field(BaseField field)
         {
             this.field = field;
-            coordsData = new TCoordData[Width, Height];
+            coords = new TCoord[Width, Height];
 
             for (int x = 0; x < Width; x++)
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    coordsData[x, y] = (TCoordData)Activator.CreateInstance(typeof(TCoordData), x, y, field)!;
+                    coords[x, y] = (TCoord)Activator.CreateInstance(typeof(TCoord), x, y, field)!;
                 }
             }
         }
 
-        public TCoordData this[int x, int y] => coordsData[x, y];
+        public TCoord this[int x, int y] => coords[x, y];
 
-        public TCoordData this[(int x, int y) coord] => coordsData[coord.x, coord.y];
+        public TCoord this[(int x, int y) coord] => coords[coord.x, coord.y];
 
         public bool IsFieldSolved()
         {
@@ -52,12 +52,12 @@ namespace Minesolver.Solvers
 
         public bool IsRevealed(int x, int y)
         {
-            return field[x, y] != BaseField.Hidden ? true : false;
+            return field[x, y] != BaseField.Hidden;
         }
 
         public bool IsFlagged(int x, int y)
         {
-            return field[x, y] == BaseField.Mine ? true : false;
+            return field[x, y] == BaseField.Mine;
         }
 
         public bool IsValue(int x, int y)
@@ -69,7 +69,7 @@ namespace Minesolver.Solvers
         {
             int num = 0;
 
-            foreach ((int x2, int y2) in coordsData[x, y].Neighbors)
+            foreach ((int x2, int y2) in coords[x, y].Neighbors)
             {
                 if (IsFlagged(x2, y2))
                 {
@@ -84,7 +84,7 @@ namespace Minesolver.Solvers
         {
             int num = 0;
 
-            foreach ((int x2, int y2) in coordsData[x, y].Neighbors)
+            foreach ((int x2, int y2) in coords[x, y].Neighbors)
             {
                 if (IsRevealed(x2, y2) == false)
                 {

@@ -62,14 +62,14 @@ namespace Minesolver.Solvers
 
         private bool SolveCoord(int x, int y)
         {
-            if (fieldData[x, y].TryAdvanced == false)
+            if (field[x, y].TryAdvanced == false)
             {
                 return false;
             }
 
-            fieldData[x, y].TryAdvanced = false;
+            field[x, y].TryAdvanced = false;
 
-            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false))
+            if (field.IsSolved(x, y) || (field.IsValue(x, y) == false))
             {
                 return false;
             }
@@ -81,13 +81,13 @@ namespace Minesolver.Solvers
 
             foreach ((int x2, int y2) in hidden)
             {
-                if (fieldData[x2, y2].TotalFlagged == 0)
+                if (field[x2, y2].TotalFlagged == 0)
                 {
                     Field.Reveal(x2, y2);
                     log.Add(x2, y2, Move.Reveal);
                     solved.Add((x2, y2));
                 }
-                else if (fieldData[x2, y2].TotalFlagged == fieldData[x2, y2].TotalCombos)
+                else if (field[x2, y2].TotalFlagged == field[x2, y2].TotalCombos)
                 {
                     Field.Flag(x2, y2);
                     log.Add(x2, y2, Move.Flag);
@@ -109,7 +109,7 @@ namespace Minesolver.Solvers
 
             foreach ((int X, int Y) coord in hidden)
             {
-                fieldData[coord].Reset();
+                field[coord].Reset();
             }
 
             return solved.Count > 0;
@@ -117,11 +117,11 @@ namespace Minesolver.Solvers
 
         private void CalcTotals(int x, int y)
         {
-            int nFlagsMissing = Field[x, y] - fieldData.NumMines(x, y);
+            int nFlagsMissing = Field[x, y] - field.NumMines(x, y);
 
             List<(int X, int Y)> hidden = GetHidden(x, y);
 
-            Combo[] combos = comboLibrary[hidden.Count, nFlagsMissing];
+            Combo[] combos = comboLib[hidden.Count, nFlagsMissing];
 
             HashSet<(int X, int Y)> affected = new HashSet<(int, int)>();
 
@@ -132,28 +132,28 @@ namespace Minesolver.Solvers
 
             foreach (Combo combo in combos)
             {
-                combo.Apply(fieldData, hidden);
+                combo.Apply(field, hidden);
 
                 if (IsComboValid(affected, 1))
                 {
                     foreach ((int X, int Y) coord in hidden)
                     {
-                        fieldData[coord].TotalCombos++;
+                        field[coord].TotalCombos++;
 
-                        if (fieldData[coord].ForceFlag)
+                        if (field[coord].ForceFlag)
                         {
-                            fieldData[coord].TotalFlagged++;
+                            field[coord].TotalFlagged++;
                         }
                     }
                 }
 
-                combo.Remove(fieldData, hidden);
+                combo.Remove(field, hidden);
             }
         }
 
         protected override bool IsCoordValid(int x, int y, uint depth)
         {
-            int nMines = fieldData.NumMines(x, y);
+            int nMines = field.NumMines(x, y);
 
             if (nMines > Field[x, y])
             {
@@ -177,7 +177,7 @@ namespace Minesolver.Solvers
                 return false;
             }
 
-            int nFlagsMissing = Field[x, y] - fieldData.NumMines(x, y);
+            int nFlagsMissing = Field[x, y] - field.NumMines(x, y);
 
             if (hidden.Count < nFlagsMissing)
             {
@@ -196,19 +196,19 @@ namespace Minesolver.Solvers
                 affected.UnionWith(GetValues(x2, y2));
             }
 
-            Combo[] combos = comboLibrary[hidden.Count, nFlagsMissing];
+            Combo[] combos = comboLib[hidden.Count, nFlagsMissing];
 
             foreach (Combo combo in combos)
             {
-                combo.Apply(fieldData, hidden);
+                combo.Apply(field, hidden);
 
                 if (IsComboValid(affected, depth + 1))
                 {
-                    combo.Remove(fieldData, hidden);
+                    combo.Remove(field, hidden);
                     return true;
                 }
 
-                combo.Remove(fieldData, hidden);
+                combo.Remove(field, hidden);
             }
 
             return false;

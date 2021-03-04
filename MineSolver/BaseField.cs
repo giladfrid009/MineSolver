@@ -93,7 +93,7 @@ namespace Minesolver
                     }
                 }
 
-                str.Append("\n");
+                str.Append('\n');
             }
 
             return str.ToString();

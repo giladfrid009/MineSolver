@@ -4,26 +4,26 @@ using System.Linq;
 
 namespace Minesolver.Solvers
 {
-    public abstract class BaseSolver<TFieldData, TCoordData>
-        where TCoordData : Coord
-        where TFieldData : Field<TCoordData>
+    public abstract class BaseSolver<TField, TCoord>
+        where TCoord : Coord
+        where TField : Field<TCoord>
     {
         public BaseField Field { get; }
         public bool HasLost { get; protected set; } = false;
 
-        protected readonly TFieldData fieldData;
+        protected readonly TField field;
+
         protected readonly MoveLog log;
-        protected readonly int width;
-        protected readonly int height;
+        
+        protected int width => field.Width;
+        protected int height => field.Height;
 
         public BaseSolver(BaseField field)
         {
-            fieldData = (TFieldData)Activator.CreateInstance(typeof(TFieldData), field)!;
+            this.field = (TField)Activator.CreateInstance(typeof(TField), field)!;
 
             Field = field;
             log = new MoveLog();
-            width = field.Width;
-            height = field.Height;
 
             field.OnLoss += (x, y) => HasLost = true;
         }
@@ -32,17 +32,17 @@ namespace Minesolver.Solvers
 
         protected List<(int X, int Y)> GetHidden(int x, int y)
         {
-            return fieldData[x, y].Neighbors.Where(coord => fieldData.IsRevealed(coord.X, coord.Y) == false).ToList();
+            return field[x, y].Neighbors.Where(coord => field.IsRevealed(coord.X, coord.Y) == false).ToList();
         }
 
         protected List<(int X, int Y)> GetValues(int x, int y)
         {
-            return fieldData[x, y].Neighbors.Where(coord => fieldData.IsValue(coord.X, coord.Y)).ToList();
+            return field[x, y].Neighbors.Where(coord => field.IsValue(coord.X, coord.Y)).ToList();
         }
 
         protected List<(int X, int Y)> GetUnsolved(int x, int y)
         {
-            return GetValues(x, y).Where(coord => fieldData.IsSolved(coord.X, coord.Y) == false).ToList();
+            return GetValues(x, y).Where(coord => field.IsSolved(coord.X, coord.Y) == false).ToList();
         }
 
         protected virtual void Reset()

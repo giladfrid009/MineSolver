@@ -32,15 +32,15 @@ namespace Minesolver.Solvers
 
         private void SolveCoord(int x, int y)
         {
-            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false) || HasLost)
+            if (field.IsSolved(x, y) || (field.IsValue(x, y) == false) || HasLost)
             {
                 return;
             }
 
             List<(int, int)> affected = new List<(int, int)>();
 
-            int nHidden = fieldData.NumHidden(x, y);
-            int nMines = fieldData.NumMines(x, y);
+            int nHidden = field.NumHidden(x, y);
+            int nMines = field.NumMines(x, y);
 
             if (Field[x, y] == nMines)
             {

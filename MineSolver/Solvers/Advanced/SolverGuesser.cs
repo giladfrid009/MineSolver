@@ -23,7 +23,7 @@ namespace Minesolver.Solvers
         {
             Reset();
 
-            while (fieldData.IsFieldSolved() == false)
+            while (field.IsFieldSolved() == false)
             {
                 FieldState oldState = new FieldState(Field);
 
@@ -40,14 +40,14 @@ namespace Minesolver.Solvers
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        if (fieldData[x, y].TryAdvanced == false)
+                        if (field[x, y].TryAdvanced == false)
                         {
                             continue;
                         }
 
                         CalcTotals(x, y, 1);
 
-                        fieldData[x, y].TryAdvanced = false;
+                        field[x, y].TryAdvanced = false;
                     }
                 }
 
@@ -74,7 +74,7 @@ namespace Minesolver.Solvers
 
         private bool CalcTotals(int x, int y, uint depth)
         {
-            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false))
+            if (field.IsSolved(x, y) || (field.IsValue(x, y) == false))
             {
                 return false;
             }
@@ -86,7 +86,7 @@ namespace Minesolver.Solvers
                 return false;
             }
 
-            int nFlagsMissing = Field[x, y] - fieldData.NumMines(x, y);
+            int nFlagsMissing = Field[x, y] - field.NumMines(x, y);
 
             if (hidden.Count < nFlagsMissing)
             {
@@ -98,7 +98,7 @@ namespace Minesolver.Solvers
                 return true;
             }
 
-            Combo[] combos = comboLibrary[hidden.Count, nFlagsMissing];
+            Combo[] combos = comboLib[hidden.Count, nFlagsMissing];
 
             HashSet<(int X, int Y)> affected = new HashSet<(int X, int Y)>();
 
@@ -111,7 +111,7 @@ namespace Minesolver.Solvers
 
             foreach (Combo combo in combos)
             {
-                combo.Apply(fieldData, hidden);
+                combo.Apply(field, hidden);
 
                 if (IsComboValid(affected, depth + 1))
                 {
@@ -119,16 +119,16 @@ namespace Minesolver.Solvers
 
                     foreach ((int X, int Y) coord in hidden)
                     {
-                        fieldData[coord].TotalCombos++;
+                        field[coord].TotalCombos++;
 
-                        if (fieldData[coord].ForceFlag)
+                        if (field[coord].ForceFlag)
                         {
-                            fieldData[coord].TotalFlagged++;
+                            field[coord].TotalFlagged++;
                         }
                     }
                 }
 
-                combo.Remove(fieldData, hidden);
+                combo.Remove(field, hidden);
             }
 
             return result;
@@ -136,7 +136,7 @@ namespace Minesolver.Solvers
 
         protected override bool IsCoordValid(int x, int y, uint depth)
         {
-            int nMines = fieldData.NumMines(x, y);
+            int nMines = field.NumMines(x, y);
 
             if (nMines > Field[x, y])
             {
@@ -167,12 +167,12 @@ namespace Minesolver.Solvers
             {
                 for (int y = 0; y < height; y++)
                 {
-                    if (fieldData.IsRevealed(x, y) || fieldData[x, y].TotalCombos == 0)
+                    if (field.IsRevealed(x, y) || field[x, y].TotalCombos == 0)
                     {
                         continue;
                     }
 
-                    double precent = (double)fieldData[x, y].TotalFlagged / fieldData[x, y].TotalCombos;
+                    double precent = (double)field[x, y].TotalFlagged / field[x, y].TotalCombos;
 
                     if (precent < minPrecent)
                     {

@@ -39,13 +39,13 @@ namespace Minesolver.Solvers
 
         private HashSet<(int X, int Y)> SolveCoord(int x, int y)
         {
-            if (fieldData.IsSolved(x, y) || (fieldData.IsValue(x, y) == false) || HasLost)
+            if (field.IsSolved(x, y) || (field.IsValue(x, y) == false) || HasLost)
             {
                 return new HashSet<(int, int)>();
             }
 
-            int nHidden = fieldData.NumHidden(x, y);
-            int nMines = fieldData.NumMines(x, y);
+            int nHidden = field.NumHidden(x, y);
+            int nMines = field.NumMines(x, y);
 
             if (Field[x, y] == nMines)
             {

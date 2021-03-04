@@ -5,18 +5,18 @@ namespace Minesolver.Solvers.Advanced
 {
     public abstract class BaseSolverAdvanced : BaseSolver<FieldAdvanced, CoordAdvanced>
     {
-        protected readonly ComboLibrary comboLibrary;
+        protected readonly ComboLib comboLib;
 
         public uint MaxDepth { get; set; } = 10;
 
         public BaseSolverAdvanced(BaseField field) : base(field)
         {
-            comboLibrary = new ComboLibrary();
+            comboLib = new ComboLib();
         }
 
         protected List<(int X, int Y)> GetNotForced(List<(int X, int Y)> coords)
         {
-            return coords.Where(coord => fieldData[coord].IsForced == false).ToList();
+            return coords.Where(coord => field[coord].IsForced == false).ToList();
         }
 
         protected void ResetFieldChanges(FieldState oldState)
@@ -37,7 +37,7 @@ namespace Minesolver.Solvers.Advanced
 
         protected void ResetCoordData(int x, int y, HashSet<(int, int)> processed)
         {
-            if (fieldData.IsValue(x, y) && fieldData.IsSolved(x, y) == false)
+            if (field.IsValue(x, y) && field.IsSolved(x, y) == false)
             {
                 ResetCoordRecursive(x, y, processed);
             }
@@ -59,7 +59,7 @@ namespace Minesolver.Solvers.Advanced
 
             processed.Add((x, y));
 
-            fieldData[x, y].Reset();
+            field[x, y].Reset();
 
             foreach ((int x2, int y2) in GetUnsolved(x, y))
             {
@@ -105,7 +105,7 @@ namespace Minesolver.Solvers.Advanced
             {
                 for (int y = 0; y < height; y++)
                 {
-                    fieldData[x, y].Reset();
+                    field[x, y].Reset();
                 }
             }
         }

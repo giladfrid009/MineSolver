@@ -77,7 +77,7 @@ namespace Minesolver.Solvers.Basic
 
             GetOpenedAreaRecursive(x, y, area);
 
-            return area.Where(coord => Field[coord] != 0 && fieldData.IsSolved(coord.X, coord.Y) == false).ToList();
+            return area.Where(coord => Field[coord] != 0 && field.IsSolved(coord.X, coord.Y) == false).ToList();
         }
 
         private void GetOpenedAreaRecursive(int x, int y, HashSet<(int, int)> area)
@@ -91,7 +91,7 @@ namespace Minesolver.Solvers.Basic
 
             if (Field[x, y] == 0)
             {
-                foreach ((int x2, int y2) in fieldData[x, y].Neighbors)
+                foreach ((int x2, int y2) in field[x, y].Neighbors)
                 {
                     GetOpenedAreaRecursive(x2, y2, area);
                 }
