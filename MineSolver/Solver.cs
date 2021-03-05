@@ -27,6 +27,8 @@ namespace Minesolver
 
         private void SolveFrom(Coord origin)
         {
+            if (origin.Value < 1) return;
+
             HashSet<Coord> oldAffected = new();
             HashSet<Coord> newAffected = new();
 
@@ -40,10 +42,7 @@ namespace Minesolver
                 {
                     oldAffected.Remove(C);
 
-                    if (C.Value == Field.Hidden || C.Value == Field.Mine || C.NumHidden == 0)
-                    {
-                        continue;
-                    }
+                    if (C.Value < 1) continue;
 
                     if (C.NumFlagged == C.Value)
                     {
