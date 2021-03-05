@@ -5,17 +5,17 @@ namespace Minesolver
 {
     public class Solver
     {
-        public Field field;
+        private readonly Field field;
+        private readonly FieldData fieldData;
 
         public Solver(Field field)
         {
             this.field = field;
+            fieldData = new FieldData(field);
         }
 
         public void Solve()
         {
-            FieldData fieldData = new FieldData(field);
-
             for (int row = 0; row < field.Height; row++)
             {
                 for (int col = 0; col < field.Width; col++)
@@ -25,52 +25,80 @@ namespace Minesolver
             }
         }
 
-        private void SolveFrom(Coord oCoord)
+        private void SolveFrom(Coord origin)
         {
             HashSet<Coord> oldAffected = new();
             HashSet<Coord> newAffected = new();
 
-            oldAffected.Add(oCoord);
+            field.OnMove += OnMove;
+
+            oldAffected.Add(origin);
 
             while (true)
             {
-                foreach (Coord aCoord in oldAffected)
+                foreach (Coord C in oldAffected)
                 {
-                    if (aCoord.Value == Field.Hidden || aCoord.Value == Field.Mine || aCoord.NumHidden == 0)
+                    oldAffected.Remove(C);
+
+                    if (C.Value == Field.Hidden || C.Value == Field.Mine || C.NumHidden == 0)
                     {
                         continue;
                     }
 
-                    if (aCoord.NumFlagged == aCoord.Value)
+                    if (C.NumFlagged == C.Value)
                     {
-                        foreach (Coord nCoord in aCoord.Adjacent)
+                        foreach (Coord nCoord in C.Adjacent)
                         {
                             if (nCoord.Value != Field.Hidden) continue;
 
                             field.Reveal(nCoord.Row, nCoord.Col);
-
-                            newAffected.UnionWith(nCoord.Adjacent);
                         }
                     }
-                    else if (aCoord.NumHidden == aCoord.Value - aCoord.NumFlagged)
+                    else if (C.NumHidden == C.Value - C.NumFlagged)
                     {
-                        foreach (Coord nCoord in aCoord.Adjacent)
+                        foreach (Coord nCoord in C.Adjacent)
                         {
                             if (nCoord.Value != Field.Hidden) continue;
 
                             field.Flag(nCoord.Row, nCoord.Col);
-
-                            newAffected.UnionWith(nCoord.Adjacent);
                         }
                     }
                 }
 
-                if (newAffected.Count == 0) return;
+                if (newAffected.Count == 0)
+                {
+                    field.OnMove -= OnMove;
+                    return;
+                }
 
-                oldAffected = newAffected;
-
-                newAffected.Clear();
+                Swap(ref oldAffected, ref newAffected);                       
             }
+
+            void OnMove(Field sender, MoveArgs e)
+            {
+                Coord C = fieldData[e.Row, e.Col];
+
+                if (e.Move == Move.Reveal)
+                {
+                    newAffected.Add(C);
+
+                    newAffected.UnionWith(C.Adjacent);
+                }
+
+                if (e.Move == Move.Flag)
+                {
+                    newAffected.UnionWith(C.Adjacent);
+                }
+            }
+        }
+
+        private void Swap<T>(ref T first, ref T second)
+        {
+            T tmp = first;
+
+            first = second;
+
+            second = tmp;
         }
     }
 }

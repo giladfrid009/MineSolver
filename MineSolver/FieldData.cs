@@ -33,25 +33,25 @@ namespace Minesolver
 
         private void GenData(Field sender)
         {
-            for (int row = 0; row < Width; row++)
+            for (int row = 0; row < Height; row++)
             {
-                for (int col = 0; col < Height; col++)
+                for (int col = 0; col < Width; col++)
                 {
                     Data[row, col] = new Coord(row, col);
                 }
             }
 
-            for (int row = 0; row < Width; row++)
+            for (int row = 0; row < Height; row++)
             {
-                for (int col = 0; col < Height; col++)
+                for (int col = 0; col < Width; col++)
                 {
                     Data[row, col].Adjacent = GetAdj(row, col).ToArray();
                 }
             }
 
-            for (int row = 0; row < Width; row++)
+            for (int row = 0; row < Height; row++)
             {
-                for (int col = 0; col < Height; col++)
+                for (int col = 0; col < Width; col++)
                 {
                     Data[row, col].Value = sender[row, col];
                 }
