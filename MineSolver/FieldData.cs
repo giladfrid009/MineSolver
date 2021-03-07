@@ -4,7 +4,7 @@ using Minefield;
 
 namespace Minesolver
 {
-    public class FieldData
+    internal class FieldData
     {
         public int Width { get; }
         public int Height { get; }
