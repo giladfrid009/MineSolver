@@ -21,47 +21,58 @@ namespace Minesolver
         {
             while (field.Game.Result == GameResult.None)
             {
-                for (int row = 0; row < field.Height; row++)
-                {
-                    for (int col = 0; col < field.Width; col++)
-                    {
-                        SolveFrom(fieldData[row, col]);
-                    }
-                }
+                SolveSimple();
 
-                if (field.Game.Result == GameResult.Won) return;
+                if (field.Game.Result != GameResult.None) return;
 
-                BestGuess();      
+                bool madeMove = GenCombos();
+
+                if (field.Game.Result != GameResult.None) return;
+
+                if (madeMove) continue;
+
+                BestGuess();
             }
         }
 
-        private void SolveFrom(Coord origin)
+        private void SolveSimple()
+        {
+            for (int row = 0; row < field.Height; row++)
+            {
+                for (int col = 0; col < field.Width; col++)
+                {
+                    SolveSimple(fieldData[row, col]);
+                }
+            }
+        }
+
+        private void SolveSimple(Coord origin)
         {
             if (origin.Value < 1) return;
 
             HashSet<Coord> oldAffected = new() { origin };
-            HashSet<Coord> newAffected = new();
+            HashSet<Coord> newAffected = new() { origin };
 
             field.OnMove += UpdateAffected;
 
-            while (true)
+            while (newAffected.Count != 0 && field.Game.Result == GameResult.None)
             {
-                foreach (Coord C in oldAffected)
+                foreach (Coord coord in oldAffected)
                 {
-                    if (C.Value < 1) continue;
+                    if (coord.Value < 1) continue;
 
-                    if (C.NumFlags == C.Value)
+                    if (coord.NumFlags == coord.Value)
                     {
-                        foreach (Coord nCoord in C.Adjacent)
+                        foreach (Coord nCoord in coord.Adjacent)
                         {
                             if (nCoord.Value != Field.Hidden) continue;
 
                             field.Reveal(nCoord.Row, nCoord.Col);
                         }
                     }
-                    else if (C.NumHidden == C.Value - C.NumFlags)
+                    else if (coord.NumHidden == coord.Value - coord.NumFlags)
                     {
-                        foreach (Coord nCoord in C.Adjacent)
+                        foreach (Coord nCoord in coord.Adjacent)
                         {
                             if (nCoord.Value != Field.Hidden) continue;
 
@@ -70,41 +81,37 @@ namespace Minesolver
                     }
                 }
 
-                if (newAffected.Count == 0)
-                {
-                    field.OnMove -= UpdateAffected;
-                    return;
-                }
-
                 Swap(ref oldAffected, ref newAffected);
 
                 newAffected.Clear();
             }
 
+            field.OnMove -= UpdateAffected;            
+
             void UpdateAffected(Field sender, MoveArgs e)
             {
-                Coord C = fieldData[e.Row, e.Col];
+                Coord coord = fieldData[e.Row, e.Col];
 
                 if (e.Move == Move.Reveal)
                 {
-                    newAffected.Add(C);
-                    newAffected.UnionWith(C.Adjacent);
+                    newAffected.Add(coord);
+                    newAffected.UnionWith(coord.Adjacent);
                 }
 
                 if (e.Move == Move.Flag)
                 {
-                    newAffected.UnionWith(C.Adjacent);
+                    newAffected.UnionWith(coord.Adjacent);
                 }
             }
         }
 
-        private void BestGuess()
+        private bool GenCombos()
         {
             for (int row = 0; row < field.Height; row++)
             {
                 for (int col = 0; col < field.Width; col++)
                 {
-                    fieldData[row, col].Combo.Reset();
+                    fieldData[row, col].Stats.Reset();
                 }
             }
 
@@ -112,24 +119,32 @@ namespace Minesolver
             {
                 for (int col = 0; col < field.Width; col++)
                 {
-                    Coord coord = fieldData[row, col];
+                    if (fieldData[row, col].Value < 1) continue;
 
-                    GenCombo(coord, 0);
+                    GenCombos(fieldData[row, col], 0);
 
-                    if (coord.Combo.MinePrec == 1)
+                    foreach (Coord coord in fieldData[row, col].Adjacent)
                     {
-                        field.Flag(row, col);
-                        return;
-                    }
+                        if (coord.Stats.MineOdds == 1)
+                        {
+                            field.Flag(coord.Row, coord.Col);                           
+                            return true;
+                        }
 
-                    if (coord.Combo.ValuePrec == 1)
-                    {
-                        field.Reveal(row, col);
-                        return;
+                        if (coord.Stats.ValOdds == 1)
+                        {
+                            field.Reveal(coord.Row, coord.Col);
+                            return true;
+                        }
                     }
                 }
             }
 
+            return false;
+        }
+
+        private void BestGuess()
+        {
             double maxMine = 0;
             double maxVal = 0;
 
@@ -139,14 +154,14 @@ namespace Minesolver
                 {
                     if (fieldData[row, col].Value != Field.Hidden) continue;
 
-                    Combo combo = fieldData[row, col].Combo;
+                    ComboStats stats = fieldData[row, col].Stats;
 
-                    maxMine = Math.Max(maxMine, combo.MinePrec);
-                    maxVal = Math.Max(maxVal, combo.ValuePrec);
+                    maxMine = Math.Max(maxMine, stats.MineOdds);
+                    maxVal = Math.Max(maxVal, stats.ValOdds);
                 }
             }
 
-            double max = Math.Max(maxMine, maxVal);
+            double maxOdds = Math.Max(maxMine, maxVal);
 
             for (int row = 0; row < field.Height; row++)
             {
@@ -154,15 +169,15 @@ namespace Minesolver
                 {
                     if (fieldData[row, col].Value != Field.Hidden) continue;
 
-                    Combo C = fieldData[row, col].Combo;                   
+                    ComboStats stats = fieldData[row, col].Stats;                   
 
-                    if (C.MinePrec >= max)
+                    if (stats.MineOdds >= maxOdds)
                     {
                         field.Flag(row, col);
                         return;
                     }
 
-                    if (C.ValuePrec >= max)
+                    if (stats.ValOdds >= maxOdds)
                     {
                         field.Reveal(row, col);
                         return;
@@ -171,17 +186,17 @@ namespace Minesolver
             }
         }
 
-        private bool GenCombo(Coord origin, int depth)
+        private bool GenCombos(Coord origin, int depth)
         {
             if (origin.Value < 1) return true;
 
             if (origin.IsValid() == false) return false;
 
-            foreach(Coord C in origin.Adjacent)
+            foreach(Coord coord in origin.Adjacent)
             {
-                if (C.Value == 0) continue;
+                if (coord.Value == 0) continue;
 
-                if (C.IsValid() == false) return false;
+                if (coord.IsValid() == false) return false;
             }
 
             if (origin.NumHidden == 0) return true;
@@ -190,16 +205,16 @@ namespace Minesolver
 
             HashSet<Coord> affected = new();
 
-            foreach(var C in origin.Adjacent)
+            foreach(var coord in origin.Adjacent)
             {
-                if (C.Value != Field.Hidden) continue;
+                if (coord.Value != Field.Hidden) continue;
 
-                affected.UnionWith(C.Adjacent);
+                affected.UnionWith(coord.Adjacent);
             }
 
             affected.ExceptWith(origin.Adjacent);
 
-            (var mineCombos, var valCombos) = ComboLib.GetCombos(origin);
+            (var mineCombos, var valCombos) = ComboMgr.Generate(origin);
 
             bool hasValid = false;
 
@@ -207,66 +222,38 @@ namespace Minesolver
             {
                 bool isValid = true;
 
-                ApplyCombo(origin.Adjacent, mineCombos[iCombo], valCombos[iCombo]);
+                ComboMgr.Apply(origin, mineCombos[iCombo], valCombos[iCombo]);
 
-                foreach(Coord C in affected)
+                foreach(Coord affCoord in affected)
                 {
-                    isValid &= GenCombo(C, depth + 1);
+                    isValid &= GenCombos(affCoord, depth + 1);
                 }
 
                 if (isValid)
                 {
                     hasValid = true;
 
-                    for (int j = 0; j < origin.NumAdj; j++)
+                    for (int i = 0; i < origin.NumAdj; i++)
                     {
-                        if (mineCombos[iCombo][j]) origin.Adjacent[j].Combo.NumFlagged++;
+                        if (mineCombos[iCombo][i]) origin.Adjacent[i].Stats.FlaggedCount++;
 
-                        if (valCombos[iCombo][j]) origin.Adjacent[j].Combo.NumOpened++;
+                        if (valCombos[iCombo][i]) origin.Adjacent[i].Stats.OpenedCount++;
                     }
                 }
 
-                RemoveCombo(origin.Adjacent, mineCombos[iCombo], valCombos[iCombo]);
+                ComboMgr.Remove(origin, mineCombos[iCombo], valCombos[iCombo]);
             }
 
             return hasValid;            
         }
 
-        private void Swap<T>(ref T first, ref T second)
+        private static void Swap<T>(ref T first, ref T second)
         {
             T tmp = first;
 
             first = second;
 
             second = tmp;
-        }
-
-        private void ApplyCombo(Coord[] adjCoords, bool[] mineCombo, bool[] valCombo)
-        {
-            if (adjCoords.Length != mineCombo.Length) throw new ArgumentOutOfRangeException(nameof(mineCombo));
-
-            if (adjCoords.Length != valCombo.Length) throw new ArgumentOutOfRangeException(nameof(valCombo));
-
-            for (int i = 0; i < adjCoords.Length; i++)
-            {
-                if (mineCombo[i]) adjCoords[i].Value = Field.Mine;
-
-                else if (valCombo[i]) adjCoords[i].Value = 0;
-            }
-        }
-
-        private void RemoveCombo(Coord[] adjCoords, bool[] mineCombo, bool[] valCombo)
-        {
-            if (adjCoords.Length != mineCombo.Length) throw new ArgumentOutOfRangeException(nameof(mineCombo));
-
-            if (adjCoords.Length != valCombo.Length) throw new ArgumentOutOfRangeException(nameof(valCombo));
-
-            for (int i = 0; i < adjCoords.Length; i++)
-            {
-                if (mineCombo[i]) adjCoords[i].Value = Field.Hidden;
-
-                else if (valCombo[i]) adjCoords[i].Value = Field.Hidden;
-            }
         }
     }
 }

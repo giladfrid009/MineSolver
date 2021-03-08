@@ -5,16 +5,14 @@ using Minefield;
 
 namespace Minesolver
 {
-    internal static class ComboLib
+    internal static class ComboMgr
     {
         private static readonly bool[][][][] AllCombos;
 
         private const int MaxAdj = 8;
 
-        static ComboLib()
+        static ComboMgr()
         {
-            //todo: fix
-
             AllCombos = new bool[MaxAdj + 1][][][];
 
             for (int nAdj = 0; nAdj <= MaxAdj; nAdj++)
@@ -58,7 +56,21 @@ namespace Minesolver
             return AllCombos[numAdj][numFlags];
         }
 
-        public static (List<bool[]> MineCombos, List<bool[]> ValCombos) GetCombos(Coord coord)
+        private static bool IsValid(Coord origin, bool[] mineCombo)
+        {
+            Coord[] adjCoords = origin.Adjacent;
+
+            if (mineCombo.Length != adjCoords.Length) return false;
+
+            for (int i = 0; i < adjCoords.Length; i++)
+            {
+                if (mineCombo[i] && adjCoords[i].Value != Field.Hidden) return false;
+            }
+
+            return true;
+        }
+
+        public static (List<bool[]> MineCombos, List<bool[]> ValCombos) Generate(Coord coord)
         {
             if (coord.Value < 0) return (new List<bool[]>(), new List<bool[]>());
 
@@ -69,7 +81,7 @@ namespace Minesolver
 
             foreach (bool[] mCombo in allCombos)
             {
-                if (IsValid(coord.Adjacent, mCombo) == false) continue;
+                if (IsValid(coord, mCombo) == false) continue;
 
                 mineCombos.Add(mCombo);
 
@@ -89,16 +101,36 @@ namespace Minesolver
             return (mineCombos, valCombos);
         }
 
-        private static bool IsValid(Coord[] adjCoords, bool[] mineCombo) //todo: fix
+        public static void Apply(Coord coord, bool[] mineCombo, bool[] valCombo)
         {
-            if (mineCombo.Length != adjCoords.Length) return false;
+            Coord[] adjCoords = coord.Adjacent;
+
+            if (adjCoords.Length != mineCombo.Length) throw new ArgumentOutOfRangeException(nameof(mineCombo));
+
+            if (adjCoords.Length != valCombo.Length) throw new ArgumentOutOfRangeException(nameof(valCombo));
 
             for (int i = 0; i < adjCoords.Length; i++)
             {
-                if (mineCombo[i] && adjCoords[i].Value != Field.Hidden) return false;
-            }
+                if (mineCombo[i]) adjCoords[i].Value = Field.Mine;
 
-            return true;
-        }      
+                else if (valCombo[i]) adjCoords[i].Value = 0;
+            }
+        }
+
+        public static void Remove(Coord coord, bool[] mineCombo, bool[] valCombo)
+        {
+            Coord[] adjCoords = coord.Adjacent;
+
+            if (adjCoords.Length != mineCombo.Length) throw new ArgumentOutOfRangeException(nameof(mineCombo));
+
+            if (adjCoords.Length != valCombo.Length) throw new ArgumentOutOfRangeException(nameof(valCombo));
+
+            for (int i = 0; i < adjCoords.Length; i++)
+            {
+                if (mineCombo[i]) adjCoords[i].Value = Field.Hidden;
+
+                else if (valCombo[i]) adjCoords[i].Value = Field.Hidden;
+            }
+        }
     }
 }

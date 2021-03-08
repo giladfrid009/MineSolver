@@ -8,7 +8,7 @@ namespace Minesolver
         public Coord[] Adjacent { get; set; } = Array.Empty<Coord>();
         public int Value { get => value; set => SetValue(value); }
 
-        public Combo Combo { get; }
+        public ComboStats Stats { get; }
         public int Row { get; }
         public int Col { get; }
         public int NumOpen { get; private set; }
@@ -23,14 +23,14 @@ namespace Minesolver
         {
             Row = row;
             Col = col;
-            Combo = new Combo();
+            Stats = new ComboStats();
         }
 
         public bool IsValid()
         {
             if (Value < 0) return true; 
 
-            if (NumFlags > Value) return false;
+            if (Value < NumFlags) return false;
 
             if (NumHidden < Value - NumFlags) return false;
 
