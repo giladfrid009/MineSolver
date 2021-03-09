@@ -4,7 +4,7 @@ using Minefield;
 
 namespace Minesolver
 {
-    internal class FieldData
+    internal class CoordsData
     {
         public int Width { get; }
         public int Height { get; }
@@ -13,7 +13,7 @@ namespace Minesolver
 
         private readonly Coord[,] Data;
 
-        public FieldData(Field field)
+        public CoordsData(Field field)
         {
             Width = field.Width;
             Height = field.Height;

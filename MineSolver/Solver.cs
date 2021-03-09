@@ -6,56 +6,101 @@ namespace Minesolver
 {
     public class Solver
     {
-        private readonly Field field;
-        private readonly FieldData fieldData;
+        private readonly Field Field;
+        private readonly CoordsData Coords;
 
-        public int MaxDepth { get; set; } = 15;
+        public int MaxDepth { get; set; } = int.MaxValue;
 
         public Solver(Field field)
         {
-            this.field = field;
-            fieldData = new FieldData(field);
+            Field = field;
+            Coords = new CoordsData(field);
         }
-
+       
         public void Solve()
         {
-            while (field.Game.Result == GameResult.None)
+            HashSet<Coord> hidden = new();
+            HashSet<Coord> trySolve = new();
+
+            CreateSets(hidden, trySolve);
+
+            Field.OnMove += UpdateSets;
+
+            while (Field.Game.Result == GameResult.None)
             {
-                SolveSimple();
+                BasicLogic();
 
-                if (field.Game.Result != GameResult.None) return;
-
-                bool madeMove = GenCombos();
-
-                if (field.Game.Result != GameResult.None) return;
+                bool madeMove = RegenCombos(hidden, trySolve);
 
                 if (madeMove) continue;
 
-                BestGuess();
+                Guess(hidden);
             }
-        }
 
-        private void SolveSimple()
-        {
-            for (int row = 0; row < field.Height; row++)
+            Field.OnMove -= UpdateSets;
+
+            void UpdateSets(Field sender, MoveArgs e)
             {
-                for (int col = 0; col < field.Width; col++)
+                if (e.Move == Move.Unflag) hidden.Add(Coords[e.Row, e.Col]);
+
+                else hidden.Remove(Coords[e.Row, e.Col]);
+
+                foreach (Coord coord in Coords[e.Row, e.Col].Adjacent)
                 {
-                    SolveSimple(fieldData[row, col]);
+                    if (coord.Value > 0)
+                    {
+                        if (coord.NumHidden != 0) trySolve.Add(coord);
+
+                        else trySolve.Remove(coord);
+                    }
                 }
             }
         }
 
-        private void SolveSimple(Coord origin)
+        private void CreateSets(HashSet<Coord> hidden, HashSet<Coord> trySolve)
         {
-            if (origin.Value < 1) return;
+            for (int row = 0; row < Coords.Height; row++)
+            {
+                for (int col = 0; col < Coords.Width; col++)
+                {
+                    Coord coord = Coords[row, col];
+
+                    if (coord.Value == Field.Hidden)
+                    {
+                        hidden.Add(Coords[row, col]);
+                    }
+
+                    else if (coord.Value > 0 && coord.NumHidden != 0)
+                    {
+                        trySolve.Add(coord);
+                    }
+                }
+            }
+        }
+
+        private void BasicLogic()
+        {
+            if (Field.Game.Result != GameResult.None) return;
+
+            for (int row = 0; row < Field.Height; row++)
+            {
+                for (int col = 0; col < Field.Width; col++)
+                {
+                    TrySolve(Coords[row, col]);
+                }
+            }
+        }
+
+        private void TrySolve(Coord origin)
+        {
+            if (origin.Value < 1 || origin.NumHidden == 0) return;
 
             HashSet<Coord> oldAffected = new() { origin };
             HashSet<Coord> newAffected = new() { origin };
 
-            field.OnMove += UpdateAffected;
+            Field.OnMove += UpdateAffected;
 
-            while (newAffected.Count != 0 && field.Game.Result == GameResult.None)
+            while (newAffected.Count != 0 && Field.Game.Result == GameResult.None)
             {
                 foreach (Coord coord in oldAffected)
                 {
@@ -63,20 +108,20 @@ namespace Minesolver
 
                     if (coord.NumFlags == coord.Value)
                     {
-                        foreach (Coord nCoord in coord.Adjacent)
+                        foreach (Coord adjCoord in coord.Adjacent)
                         {
-                            if (nCoord.Value != Field.Hidden) continue;
+                            if (adjCoord.Value != Field.Hidden) continue;
 
-                            field.Reveal(nCoord.Row, nCoord.Col);
+                            Field.Reveal(adjCoord.Row, adjCoord.Col);
                         }
                     }
                     else if (coord.NumHidden == coord.Value - coord.NumFlags)
                     {
-                        foreach (Coord nCoord in coord.Adjacent)
+                        foreach (Coord adjCoord in coord.Adjacent)
                         {
-                            if (nCoord.Value != Field.Hidden) continue;
+                            if (adjCoord.Value != Field.Hidden) continue;
 
-                            field.Flag(nCoord.Row, nCoord.Col);
+                            Field.Flag(adjCoord.Row, adjCoord.Col);
                         }
                     }
                 }
@@ -86,11 +131,11 @@ namespace Minesolver
                 newAffected.Clear();
             }
 
-            field.OnMove -= UpdateAffected;            
+            Field.OnMove -= UpdateAffected;
 
             void UpdateAffected(Field sender, MoveArgs e)
             {
-                Coord coord = fieldData[e.Row, e.Col];
+                Coord coord = Coords[e.Row, e.Col];
 
                 if (e.Move == Move.Reveal)
                 {
@@ -98,92 +143,54 @@ namespace Minesolver
                     newAffected.UnionWith(coord.Adjacent);
                 }
 
-                if (e.Move == Move.Flag)
+                else if (e.Move == Move.Flag)
                 {
                     newAffected.UnionWith(coord.Adjacent);
                 }
             }
         }
 
-        private bool GenCombos()
+        private static void Swap<T>(ref T first, ref T second)
         {
-            for (int row = 0; row < field.Height; row++)
+            T tmp = first;
+
+            first = second;
+
+            second = tmp;
+        }
+
+        private bool RegenCombos(HashSet<Coord> hidden, HashSet<Coord> trySolve)
+        {
+            if (Field.Game.Result != GameResult.None) return false;
+
+            foreach (Coord coord in hidden)
             {
-                for (int col = 0; col < field.Width; col++)
-                {
-                    fieldData[row, col].Stats.Reset();
-                }
+                coord.Stats.Clear();
             }
 
-            for (int row = 0; row < field.Height; row++)
+            foreach(Coord coord in trySolve)
             {
-                for (int col = 0; col < field.Width; col++)
+                GenCombos(coord, 0);
+
+                foreach (Coord adjCoord in coord.Adjacent)
                 {
-                    if (fieldData[row, col].Value < 1) continue;
+                    if (adjCoord.Value != Field.Hidden) continue;
 
-                    GenCombos(fieldData[row, col], 0);
-
-                    foreach (Coord coord in fieldData[row, col].Adjacent)
+                    if (adjCoord.Stats.MineOdds == 1)
                     {
-                        if (coord.Stats.MineOdds == 1)
-                        {
-                            field.Flag(coord.Row, coord.Col);                           
-                            return true;
-                        }
+                        Field.Flag(adjCoord.Row, adjCoord.Col);
+                        return true;
+                    }
 
-                        if (coord.Stats.ValOdds == 1)
-                        {
-                            field.Reveal(coord.Row, coord.Col);
-                            return true;
-                        }
+                    if (adjCoord.Stats.ValueOdds == 1)
+                    {
+                        Field.Reveal(adjCoord.Row, adjCoord.Col);
+                        return true;
                     }
                 }
             }
 
             return false;
-        }
-
-        private void BestGuess()
-        {
-            double maxMine = 0;
-            double maxVal = 0;
-
-            for (int row = 0; row < field.Height; row++)
-            {
-                for (int col = 0; col < field.Width; col++)
-                {
-                    if (fieldData[row, col].Value != Field.Hidden) continue;
-
-                    ComboStats stats = fieldData[row, col].Stats;
-
-                    maxMine = Math.Max(maxMine, stats.MineOdds);
-                    maxVal = Math.Max(maxVal, stats.ValOdds);
-                }
-            }
-
-            double maxOdds = Math.Max(maxMine, maxVal);
-
-            for (int row = 0; row < field.Height; row++)
-            {
-                for (int col = 0; col < field.Width; col++)
-                {
-                    if (fieldData[row, col].Value != Field.Hidden) continue;
-
-                    ComboStats stats = fieldData[row, col].Stats;                   
-
-                    if (stats.MineOdds >= maxOdds)
-                    {
-                        field.Flag(row, col);
-                        return;
-                    }
-
-                    if (stats.ValOdds >= maxOdds)
-                    {
-                        field.Reveal(row, col);
-                        return;
-                    }
-                }
-            }
         }
 
         private bool GenCombos(Coord origin, int depth)
@@ -224,9 +231,9 @@ namespace Minesolver
 
                 ComboMgr.Apply(origin, mineCombos[iCombo], valCombos[iCombo]);
 
-                foreach(Coord affCoord in affected)
+                foreach(Coord coord in affected)
                 {
-                    isValid &= GenCombos(affCoord, depth + 1);
+                    isValid &= GenCombos(coord, depth + 1);
                 }
 
                 if (isValid)
@@ -235,9 +242,15 @@ namespace Minesolver
 
                     for (int i = 0; i < origin.NumAdj; i++)
                     {
-                        if (mineCombos[iCombo][i]) origin.Adjacent[i].Stats.FlaggedCount++;
+                        if (mineCombos[iCombo][i])
+                        {
+                            origin.Adjacent[i].Stats.FlaggedCount++;
+                        }
 
-                        if (valCombos[iCombo][i]) origin.Adjacent[i].Stats.OpenedCount++;
+                        else if (valCombos[iCombo][i])
+                        {
+                            origin.Adjacent[i].Stats.OpenedCount++;
+                        }
                     }
                 }
 
@@ -247,13 +260,36 @@ namespace Minesolver
             return hasValid;            
         }
 
-        private static void Swap<T>(ref T first, ref T second)
+        private void Guess(HashSet<Coord> hidden)
         {
-            T tmp = first;
+            if (Field.Game.Result != GameResult.None) return;
 
-            first = second;
+            double maxMine = 0;
+            double maxValue = 0;
 
-            second = tmp;
-        }
+            foreach (Coord coord in hidden)
+            {
+                maxMine = Math.Max(maxMine, coord.Stats.MineOdds);
+
+                maxValue = Math.Max(maxValue, coord.Stats.ValueOdds);
+            }
+
+            double maxOdds = Math.Max(maxMine, maxValue);
+
+            foreach (Coord coord in hidden)
+            {
+                if (coord.Stats.MineOdds >= maxOdds && Field.Game.NumFlags < Field.Game.TotalMines)
+                {
+                    Field.Flag(coord.Row, coord.Col);
+                    return;
+                }
+
+                if (coord.Stats.ValueOdds >= maxOdds)
+                {
+                    Field.Reveal(coord.Row, coord.Col);
+                    return;
+                }
+            }
+        }        
     }
 }

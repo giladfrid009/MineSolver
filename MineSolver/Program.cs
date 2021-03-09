@@ -1,5 +1,5 @@
-﻿using Minefield;
-using System;
+﻿using System;
+using Minefield;
 
 namespace Minesolver
 {

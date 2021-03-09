@@ -7,9 +7,9 @@
 
         public int Total => FlaggedCount + OpenedCount;
         public double MineOdds => Total != 0 ? (double)FlaggedCount / Total : 0;
-        public double ValOdds => Total != 0 ? (double)OpenedCount / Total : 0;
+        public double ValueOdds => Total != 0 ? (double)OpenedCount / Total : 0;
 
-        public void Reset()
+        public void Clear()
         {
             FlaggedCount = 0;
             OpenedCount = 0;
