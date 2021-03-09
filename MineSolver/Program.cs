@@ -1,7 +1,5 @@
-﻿using Minesolver.ConsoleField;
-using Minesolver.ConsoleField.Benchmark;
-using Minesolver.Solvers;
-using System;
+﻿using System;
+using Minefield;
 
 namespace Minesolver
 {
@@ -9,16 +7,29 @@ namespace Minesolver
     {
         private static void Main()
         {
-            CField field = new CField(260, 65);
+            Field field = new Field(30, 120);
 
-            SolverGuesser solverGuesser = new SolverGuesser(field);
+            ConsGraphics G = new ConsGraphics();
 
-            Console.WriteLine(Benchmarks.CountUnsolved(solverGuesser, 100, 0)); // 2070
+            G.Subscribe(field);
 
-            //Console.WriteLine(Benchmarks.MeasureTime(solverGuesser, 100, 0));
+            Solver S = new Solver(field)
+            {
+                MaxDepth = 10
+            };
+
+            for (int i = 0; i < 100; i++)
+            {
+                Console.Title = i.ToString();
+
+                field.Generate(0.2, 5, 5, 1, i);
+
+                S.Solve();
+
+                Console.ReadKey();
+            }
 
             Console.ReadKey();
         }
-
     }
 }
