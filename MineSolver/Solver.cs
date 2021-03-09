@@ -104,7 +104,7 @@ namespace Minesolver
             {
                 foreach (Coord coord in oldAffected)
                 {
-                    if (coord.Value < 1) continue;
+                    if (coord.Value < 1 || coord.NumHidden == 0) continue;
 
                     if (coord.NumFlags == coord.Value)
                     {
@@ -153,9 +153,7 @@ namespace Minesolver
         private static void Swap<T>(ref T first, ref T second)
         {
             T tmp = first;
-
             first = second;
-
             second = tmp;
         }
 
@@ -199,7 +197,7 @@ namespace Minesolver
 
             if (origin.IsValid() == false) return false;
 
-            foreach(Coord coord in origin.Adjacent)
+            foreach (Coord coord in origin.Adjacent)
             {
                 if (coord.Value == 0) continue;
 
@@ -227,13 +225,15 @@ namespace Minesolver
 
             for (int iCombo = 0; iCombo < mineCombos.Count; iCombo++)
             {
-                bool isValid = true;
-
                 ComboMgr.Apply(origin, mineCombos[iCombo], valCombos[iCombo]);
 
-                foreach(Coord coord in affected)
+                bool isValid = true;
+
+                foreach (Coord coord in affected)
                 {
                     isValid &= GenCombos(coord, depth + 1);
+
+                    if (isValid == false) break;
                 }
 
                 if (isValid)
