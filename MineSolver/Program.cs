@@ -7,29 +7,29 @@ namespace Minesolver
     {
         private static void Main()
         {
-            Field field = new Field(30, 120);
+            Field field = new Field(16, 16);
 
             ConsGraphics G = new ConsGraphics();
 
             G.Subscribe(field);
 
-            Solver S = new Solver(field)
-            {
-                MaxDepth = 10
-            };
+            Solver S = new Solver(field);
 
-            for (int i = 0; i < 100; i++)
-            {
-                Console.Title = i.ToString();
+            int nGames = 100000;
+            int nWins = 0;
 
-                field.Generate(0.2, 5, 5, 1, i);
+            for (int i = 56280; i < nGames; i++)
+            {
+                field.Generate(0.15625, 5, 5, 2, i);
 
                 S.Solve();
 
                 Console.ReadKey();
             }
 
-            Console.ReadKey();
+            Console.WriteLine((double)nWins / nGames * 100);
+
+            Console.WriteLine("Done");
         }
     }
 }

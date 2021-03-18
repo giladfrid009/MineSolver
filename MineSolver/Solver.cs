@@ -9,7 +9,7 @@ namespace Minesolver
         private readonly Field Field;
         private readonly CoordsData Coords;
 
-        public int MaxDepth { get; set; } = int.MaxValue;
+        public int MaxDepth { get; set; } = 10;
 
         public Solver(Field field)
         {
@@ -26,9 +26,9 @@ namespace Minesolver
 
             Field.OnMove += UpdateSets;
 
-            while (Field.Game.Result == GameResult.None)
+            while (Field.Game.Result == GameResult.None && Field.Game.NumHidden != 0)
             {
-                BasicLogic();
+                BasicLogic(trySolve);
 
                 bool madeMove = RegenCombos(hidden, trySolve);
 
@@ -41,17 +41,19 @@ namespace Minesolver
 
             void UpdateSets(Field sender, MoveArgs e)
             {
-                if (e.Move == Move.Unflag) hidden.Add(Coords[e.Row, e.Col]);
+                Coord coord = Coords[e.Row, e.Col];
 
-                else hidden.Remove(Coords[e.Row, e.Col]);
+                if (e.Move == Move.Unflag) hidden.Add(coord);
 
-                foreach (Coord coord in Coords[e.Row, e.Col].Adjacent)
+                else hidden.Remove(coord);
+
+                foreach (Coord adjCoord in coord.Adjacent)
                 {
-                    if (coord.Value > 0)
+                    if (adjCoord.Value > 0)
                     {
-                        if (coord.NumHidden != 0) trySolve.Add(coord);
+                        if (adjCoord.NumHidden != 0) trySolve.Add(adjCoord);
 
-                        else trySolve.Remove(coord);
+                        else trySolve.Remove(adjCoord);
                     }
                 }
             }
@@ -69,7 +71,6 @@ namespace Minesolver
                     {
                         hidden.Add(Coords[row, col]);
                     }
-
                     else if (coord.Value > 0 && coord.NumHidden != 0)
                     {
                         trySolve.Add(coord);
@@ -78,7 +79,7 @@ namespace Minesolver
             }
         }
 
-        private void BasicLogic()
+        private void BasicLogic(HashSet<Coord> trySolve)
         {
             if (Field.Game.Result != GameResult.None) return;
 
@@ -86,7 +87,10 @@ namespace Minesolver
             {
                 for (int col = 0; col < Field.Width; col++)
                 {
-                    TrySolve(Coords[row, col]);
+                    if (trySolve.Contains(Coords[row, col]))
+                    {
+                        TrySolve(Coords[row, col]);
+                    }
                 }
             }
         }
@@ -197,26 +201,23 @@ namespace Minesolver
 
             if (origin.IsValid() == false) return false;
 
-            foreach (Coord coord in origin.Adjacent)
-            {
-                if (coord.Value == 0) continue;
-
-                if (coord.IsValid() == false) return false;
-            }
-
             if (origin.NumHidden == 0) return true;
 
             if (depth > MaxDepth) return true;
 
             HashSet<Coord> affected = new();
 
-            foreach(var coord in origin.Adjacent)
+            foreach(Coord coord in origin.Adjacent)
             {
                 if (coord.Value != Field.Hidden) continue;
 
-                affected.UnionWith(coord.Adjacent);
+                foreach (Coord adjCoord in coord.Adjacent)
+                {
+                    if (adjCoord.Value > 0) affected.Add(adjCoord);
+                }
             }
 
+            affected.Remove(origin);
             affected.ExceptWith(origin.Adjacent);
 
             (var mineCombos, var valCombos) = ComboMgr.Generate(origin);
@@ -229,11 +230,20 @@ namespace Minesolver
 
                 bool isValid = true;
 
+                foreach (Coord coord in origin.Adjacent)
+                {
+                    if (isValid == false) break;
+
+                    if (coord.Value < 1) continue;
+
+                    if (coord.IsValid() == false) isValid = false;
+                }
+
                 foreach (Coord coord in affected)
                 {
-                    isValid &= GenCombos(coord, depth + 1);
-
                     if (isValid == false) break;
+
+                    isValid = GenCombos(coord, depth + 1);
                 }
 
                 if (isValid)
