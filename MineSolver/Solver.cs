@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Minefield;
 
 namespace Minesolver
@@ -41,11 +42,18 @@ namespace Minesolver
 
             void UpdateSets(Field sender, MoveArgs e)
             {
-                Coord coord = Coords[e.Row, e.Col];
+                Coord coord = Coords[e.Row, e.Col];                
 
-                if (e.Move == Move.Unflag) hidden.Add(coord);
+                if(e.Move == Move.Unflag) hidden.Add(coord);
 
                 else hidden.Remove(coord);
+
+                if (coord.Value > 0)
+                {
+                    if (coord.NumHidden != 0) trySolve.Add(coord);
+
+                    else trySolve.Remove(coord);
+                }
 
                 foreach (Coord adjCoord in coord.Adjacent)
                 {
@@ -69,7 +77,7 @@ namespace Minesolver
 
                     if (coord.Value == Field.Hidden)
                     {
-                        hidden.Add(Coords[row, col]);
+                        hidden.Add(coord);
                     }
                     else if (coord.Value > 0 && coord.NumHidden != 0)
                     {
