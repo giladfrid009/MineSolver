@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Minefield;
 
 namespace Minesolver
@@ -108,11 +107,11 @@ namespace Minesolver
             if (origin.Value < 1 || origin.NumHidden == 0) return;
 
             HashSet<Coord> oldAffected = new() { origin };
-            HashSet<Coord> newAffected = new() { origin };
+            HashSet<Coord> newAffected = new();
 
             Field.OnMove += UpdateAffected;
 
-            while (newAffected.Count != 0 && Field.Game.Result == GameResult.None)
+            while (oldAffected.Count != 0 && Field.Game.Result == GameResult.None)
             {
                 foreach (Coord coord in oldAffected)
                 {
@@ -149,15 +148,16 @@ namespace Minesolver
             {
                 Coord coord = Coords[e.Row, e.Col];
 
-                if (e.Move == Move.Reveal)
-                {
-                    newAffected.Add(coord);
-                    newAffected.UnionWith(coord.Adjacent);
-                }
+                if (coord.Value > 0 && coord.NumHidden != 0) newAffected.Add(coord);
 
-                else if (e.Move == Move.Flag)
+                foreach (Coord adjCoord in coord.Adjacent)
                 {
-                    newAffected.UnionWith(coord.Adjacent);
+                    if (adjCoord.Value > 0)
+                    {
+                        if (adjCoord.NumHidden != 0) newAffected.Add(adjCoord);
+
+                        else newAffected.Remove(adjCoord);
+                    }
                 }
             }
         }

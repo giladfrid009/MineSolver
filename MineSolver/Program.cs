@@ -7,7 +7,7 @@ namespace Minesolver
     {
         private static void Main()
         {
-            Field field = new Field(10, 10);
+            Field field = new Field(65, 250);
 
             new ConsGraphics(field);
 
@@ -18,8 +18,6 @@ namespace Minesolver
 
             for (int i = 0; i < nGames; i++)
             {
-                new ConsGraphics(field);
-
                 field.Generate(0.15625, field.Height / 2, field.Width / 2, 2, i);
 
                 S.Solve();
