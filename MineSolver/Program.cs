@@ -7,11 +7,11 @@ namespace Minesolver
     {
         private static void Main()
         {
-            Field field = new Field(65, 250);
+            Field field = new(65, 250);
 
             new ConsGraphics(field);
 
-            Solver S = new Solver(field);
+            Solver S = new(field);
 
             int nGames = 10000000;
             int nWins = 0;
